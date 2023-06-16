@@ -1,0 +1,73 @@
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    xmlns:lottie="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/positionLayout"
+    android:layout_width="match_parent"
+
+    android:layout_height="wrap_content"
+    android:background="@color/light_rampart"
+    android:padding="16dp">
+
+
+    <CheckBox
+        android:id="@+id/doOrNo"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:button="@drawable/checker_selector"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/task"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/ubuntu"
+        android:maxLines="3"
+        android:text="Sample task text that can occupy multiple lines. If more than three lines, it will be truncated with an ellipsis."
+        android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+        android:textColor="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@id/doOrNo"
+        app:layout_constraintTop_toTopOf="@id/doOrNo"
+        lottie:layout_constraintEnd_toStartOf="@+id/importance" />
+
+    <ImageView
+        android:id="@+id/importance"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        lottie:layout_constraintEnd_toEndOf="parent"
+        lottie:layout_constraintStart_toEndOf="@+id/task"
+        lottie:layout_constraintTop_toTopOf="@+id/task"
+        lottie:srcCompat="@drawable/normally" />
+
+    <TextView
+        android:id="@+id/deadline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/ubuntu_light"
+        android:text="TextView"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="@+id/task"
+        lottie:layout_constraintTop_toBottomOf="@+id/task" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_margin="8dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/rampart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/deadline" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

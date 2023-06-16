@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/light_rampart">
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/newTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/ubuntu_bold"
+            android:text="@string/new_task"
+            android:textColor="@color/black_Olive"
+            android:textSize="24sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/descriptionInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/rounded_edit_text_background"
+            android:hint="Enter description"
+            android:inputType="textMultiLine"
+            android:padding="10dp"
+            android:textColor="@color/black_Olive"
+            android:textColorHighlight="@color/sneaky_Sesame"
+            android:textColorHint="@color/black_Olive"
+            android:textColorLink="@color/cave_Man"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cancelButton" />
+
+        <TextView
+            android:id="@+id/textShowCalendar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/ubuntu"
+            android:text="@string/set_deadline"
+            android:textColor="@color/black_Olive"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toggleButtonImportance" />
+
+        <Switch
+            android:id="@+id/showCalendar"
+            style="@style/CustomSwitchStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textColorHighlight="@color/green_Empress"
+            android:textColorLink="@color/green_Empress"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/textShowCalendar" />
+
+        <DatePicker
+            android:id="@+id/myDeadlineDatePicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:calendarTextColor="@color/black_Olive"
+            android:headerBackground="@color/green_Empress"
+            android:theme="@style/CustomDatePickerStyle"
+            android:visibility="gone"
+            android:yearListSelectorColor="@color/green_Empress"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.586"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textShowCalendar" />
+
+        <TextView
+            android:id="@+id/importanceText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/ubuntu"
+            android:text="@string/importance"
+            android:textColor="@color/black_Olive"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/descriptionInput" />
+
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleButtonImportance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/importanceText"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/slowButton"
+                style="@style/ToggleButtonWithIconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/cave_Man"
+                app:icon="@drawable/slow"
+                tools:layout_editor_absoluteX="168dp"
+                tools:layout_editor_absoluteY="153dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/normalButton"
+                style="@style/ToggleButtonWithIconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/cave_Man"
+                app:icon="@drawable/normally"
+                tools:layout_editor_absoluteX="173dp"
+                tools:layout_editor_absoluteY="251dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/urgentlyButton"
+                style="@style/ToggleButtonWithIconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/cave_Man"
+                app:icon="@drawable/urgently"
+                tools:layout_editor_absoluteX="166dp"
+                tools:layout_editor_absoluteY="340dp" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+
+        <Button
+            android:id="@+id/cancelButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/sneaky_Sesame"
+            android:fontFamily="@font/ubuntu"
+            android:text="@string/cancel"
+            android:textColor="@color/black_Olive"
+            app:cornerRadius="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/newTask" />
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:backgroundTint="@color/sneaky_Sesame"
+            android:fontFamily="@font/ubuntu"
+            android:text="@string/save"
+            android:textColor="@color/black_Olive"
+            app:cornerRadius="20dp"
+            app:iconGravity="start"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/newTask" />
+
+        <Button
+            android:id="@+id/removeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/sneaky_Sesame"
+            android:fontFamily="@font/ubuntu"
+            android:text="@string/remove"
+            android:textColor="@color/black_Olive"
+            app:cornerRadius="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/myDeadlineDatePicker" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
+

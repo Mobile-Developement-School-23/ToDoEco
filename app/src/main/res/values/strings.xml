@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">ToDoApp</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+
+    <string name="menu_tasks">Tasks</string>
+    <string name="menu_editadd">Add</string>
+    <string name="menu_none">None</string>
+
+    <string name="my_tasks">My tasks</string>
+    <string name="null_do">Done - 0</string>
+    <string name="to_new_add_ed_fragment">Switching to an add Fragment.</string>
+    <string name="show_hidden">Hide</string>
+
+    <string name="importance">Importance: </string>
+    <string name="new_task">New task</string>
+    <string name="set_deadline">Set the deadline for a task: </string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save  </string>
+    <string name="remove">Remove</string>
+
+</resources>

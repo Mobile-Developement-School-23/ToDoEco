@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/copy_option"
+        android:icon="@drawable/note_svgrepo_com"
+        android:title="Copy text of task" />
+    <item
+        android:id="@+id/info_option"
+        android:icon="@drawable/infomove"
+        android:title="See more info..." />
+
+</menu>
