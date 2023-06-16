@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
 import android.text.Layout
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -47,7 +48,9 @@ class ToDoAdapter(private val context: Context, private var todoList: List<ToDoI
         holder.itemView.setOnClickListener {
             listener.onItemClick(position)
         }
+
         holder.bind(todoItem)
+
     }
 
 
@@ -71,10 +74,16 @@ class ToDoAdapter(private val context: Context, private var todoList: List<ToDoI
 
         fun bind(todoItem: ToDoItem) {
 
-
             val isChecked = todoItem.isDone
 
             completionStatus.isChecked = todoItem.isDone
+
+            if (isChecked) {
+
+                todoText.paintFlags = todoText.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                todoText.setTextColor(Color.GRAY)
+
+            }
 
             completionStatus.setOnCheckedChangeListener { _, isChecked ->
 
@@ -100,12 +109,6 @@ class ToDoAdapter(private val context: Context, private var todoList: List<ToDoI
 
             }
 
-            if (isChecked) {
-
-                todoText.paintFlags = todoText.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                todoText.setTextColor(Color.GRAY)
-
-            }
 
             todoText.text = todoItem.text
 
@@ -128,7 +131,7 @@ class ToDoAdapter(private val context: Context, private var todoList: List<ToDoI
 
             importanceIndicator.setImageResource(importanceIcon)
 
-            val position = position
+            val position = absoluteAdapterPosition
 
             layout.setOnLongClickListener {
 

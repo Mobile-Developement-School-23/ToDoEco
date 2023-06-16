@@ -52,11 +52,15 @@ class HomeAndAddViewModel() : ViewModel() {
     }
 
     fun setFilledModel(item: ToDoItem) {
+
         filledModel = item
+
     }
 
     fun getFilledModel(): ToDoItem {
+
         return filledModel
+
     }
 
     fun removeFilledModel() {
