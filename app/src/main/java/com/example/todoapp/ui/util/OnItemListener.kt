@@ -1,4 +1,4 @@
-package com.example.todoapp
+package com.example.todoapp.ui.util
 
 interface OnItemListener {
 

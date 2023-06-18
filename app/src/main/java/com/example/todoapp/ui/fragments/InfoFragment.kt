@@ -1,4 +1,4 @@
-package com.example.todoapp.ui.info
+package com.example.todoapp.ui.fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,11 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
-import com.example.todoapp.R
 import com.example.todoapp.data.ToDoItem
-import com.example.todoapp.databinding.FragmentHomeBinding
 import com.example.todoapp.databinding.InfoFragmentDialogBinding
-import com.example.todoapp.ui.home.HomeAndAddViewModel
+import com.example.todoapp.ui.viewmodels.HomeAndAddViewModel
 import java.text.SimpleDateFormat
 
 class InfoFragment : DialogFragment() {

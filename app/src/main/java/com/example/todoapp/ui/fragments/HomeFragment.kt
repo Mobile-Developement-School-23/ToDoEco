@@ -1,19 +1,15 @@
-package com.example.todoapp.ui.home
+package com.example.todoapp.ui.fragments
 
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.icu.text.IDNA.Info
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -25,11 +21,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
 import com.example.todoapp.databinding.FragmentHomeBinding
-import com.example.todoapp.OnItemListener
+import com.example.todoapp.ui.util.OnItemListener
 import com.example.todoapp.ui.activity.MainActivity
 import com.example.todoapp.ui.adapters.ToDoAdapter
-import com.example.todoapp.ui.handlers.SwipeGesture
-import com.example.todoapp.ui.info.InfoFragment
+import com.example.todoapp.ui.util.SwipeGesture
+import com.example.todoapp.ui.viewmodels.HomeAndAddViewModel
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 

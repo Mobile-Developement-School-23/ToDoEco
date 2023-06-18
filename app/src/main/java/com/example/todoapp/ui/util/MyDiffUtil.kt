@@ -1,4 +1,4 @@
-package com.example.todoapp.ui.handlers
+package com.example.todoapp.ui.util
 
 import android.util.Log
 import androidx.recyclerview.widget.DiffUtil

@@ -3,21 +3,18 @@ package com.example.todoapp.ui.adapters
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
-import android.text.Layout
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.data.ToDoItem
 import com.example.todoapp.R
-import com.example.todoapp.OnItemListener
-import com.example.todoapp.ui.handlers.MyDiffUtil
+import com.example.todoapp.ui.util.OnItemListener
+import com.example.todoapp.ui.util.MyDiffUtil
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -83,6 +80,11 @@ class ToDoAdapter(private val context: Context, private var todoList: List<ToDoI
                 todoText.paintFlags = todoText.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
                 todoText.setTextColor(Color.GRAY)
 
+            } else {
+
+                todoText.paintFlags = todoText.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                todoText.setTextColor(Color.rgb(59, 58, 54))
+
             }
 
             completionStatus.setOnCheckedChangeListener { _, isChecked ->
@@ -118,6 +120,10 @@ class ToDoAdapter(private val context: Context, private var todoList: List<ToDoI
 
                 deadline.visibility = View.VISIBLE
                 deadline.text = dateFormat.format(todoItem.deadline)
+
+            } else {
+
+                deadline.visibility = View.INVISIBLE
 
             }
 

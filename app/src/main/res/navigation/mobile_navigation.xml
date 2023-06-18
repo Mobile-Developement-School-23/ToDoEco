@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.example.todoapp.ui.home.HomeFragment"
+        android:name="com.example.todoapp.ui.fragments.HomeFragment"
         android:label="@string/menu_tasks"
         tools:layout="@layout/fragment_home" >
         <action
@@ -19,13 +19,13 @@
 
     <fragment
         android:id="@+id/nav_gallery"
-        android:name="com.example.todoapp.ui.editor.EditAddFragment"
+        android:name="com.example.todoapp.ui.fragments.EditAddFragment"
         android:label="@string/menu_editadd"
         tools:layout="@layout/fragment_edit" />
 
     <fragment
         android:id="@+id/nav_slideshow"
-        android:name="com.example.todoapp.ui.anon.SlideshowFragment"
+        android:name="com.example.todoapp.ui.fragments.SlideshowFragment"
         android:label="@string/menu_none"
         tools:layout="@layout/fragment_slideshow" />
 </navigation>

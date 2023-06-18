@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.ToDoApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/black_Olive</item>
+        <item name="colorPrimary">@color/sneaky_Sesame</item>
         <item name="colorPrimaryVariant">@color/heavy_Metal</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->

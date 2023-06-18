@@ -1,7 +1,6 @@
-package com.example.todoapp.ui.editor
+package com.example.todoapp.ui.fragments
 
 import android.app.AlertDialog
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,11 +9,11 @@ import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.Navigation
 import com.example.todoapp.R
 import com.example.todoapp.data.ToDoItem
 import com.example.todoapp.databinding.FragmentEditBinding
-import com.example.todoapp.ui.activity.MainActivity
-import com.example.todoapp.ui.home.HomeAndAddViewModel
+import com.example.todoapp.ui.viewmodels.HomeAndAddViewModel
 import java.util.Calendar
 import java.util.Date
 
@@ -174,7 +173,7 @@ class EditAddFragment : Fragment() {
             .setPositiveButton("OK") { dialog, _ ->
 
                 homeAndAddViewModel.removeFilledModel()
-                requireActivity().supportFragmentManager.popBackStack()
+                Navigation.findNavController(binding.root).navigate(R.id.nav_home)
 
             }
             .setNegativeButton("Cancel") { dialog, _ ->
@@ -198,7 +197,7 @@ class EditAddFragment : Fragment() {
 
                 homeAndAddViewModel.saveDataToRepo()
                 homeAndAddViewModel.removeFilledModel()
-                requireActivity().supportFragmentManager.popBackStack()
+                Navigation.findNavController(binding.root).navigate(R.id.nav_home)
 
             }
             .setNegativeButton("Cancel") { dialog, _ ->
@@ -219,9 +218,12 @@ class EditAddFragment : Fragment() {
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton("OK") { dialog, _ ->
 
+
                 homeAndAddViewModel.removeDataFromRepo()
+
                 homeAndAddViewModel.removeFilledModel()
-                requireActivity().supportFragmentManager.popBackStack()
+
+                Navigation.findNavController(binding.root).navigate(R.id.nav_home)
 
             }
             .setNegativeButton("Cancel") { dialog, _ ->
@@ -246,7 +248,7 @@ class EditAddFragment : Fragment() {
                 Log.d("ADDATATOREPO", homeAndAddViewModel.toDoList.value.toString())
                 homeAndAddViewModel.nextId()
                 homeAndAddViewModel.removeFilledModel()
-                requireActivity().supportFragmentManager.popBackStack()
+                Navigation.findNavController(binding.root).navigate(R.id.nav_home)
 
             }
             .setNegativeButton("Cancel") { dialog, _ ->

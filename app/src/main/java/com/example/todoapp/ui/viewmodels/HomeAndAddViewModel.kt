@@ -1,6 +1,5 @@
-package com.example.todoapp.ui.home
+package com.example.todoapp.ui.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,10 +12,9 @@ import java.util.Calendar
 class HomeAndAddViewModel() : ViewModel() {
 
     private val _todoList: MutableLiveData<List<ToDoItem>> = MutableLiveData()
-    val toDoList: LiveData<List<ToDoItem>> get() = _todoList
+    val toDoList: MutableLiveData<List<ToDoItem>> get() = _todoList
     private val toDoRepo = ToDoRepository()
-    private var idCount = "11"
-    private var filledModel: ToDoItem = ToDoItem(idCount, "", ToDoItem.Importance.NORMAL, null,
+    private var filledModel: ToDoItem = ToDoItem(toDoRepo.id, "", ToDoItem.Importance.NORMAL, null,
         false, Calendar.getInstance().time, null)
     private var stateFlag = 0
     private var _counterToDo = MutableLiveData<Int>()
@@ -26,16 +24,16 @@ class HomeAndAddViewModel() : ViewModel() {
 
     init {
 
-
-
-        viewModelScope.launch {
-            toDoRepo.getToDoListFlow().collect { updatedTodoList ->
-                _todoList.value = updatedTodoList
-           }
-        }
-
-
+        fetchToDOList()
         _counterToDo.value = toDoList.value?.count { it.isDone }!!
+
+
+
+    }
+
+    fun fetchToDOList() {
+
+        toDoList.value = toDoRepo.getToDoListFlow()
 
     }
 
@@ -64,7 +62,7 @@ class HomeAndAddViewModel() : ViewModel() {
     }
 
     fun removeFilledModel() {
-        val filledModel: ToDoItem = ToDoItem(idCount, "", ToDoItem.Importance.NORMAL, null,
+        val filledModel: ToDoItem = ToDoItem(toDoRepo.id, "", ToDoItem.Importance.NORMAL, null,
             false, Calendar.getInstance().time, null)
         this.filledModel = filledModel
     }
@@ -85,6 +83,9 @@ class HomeAndAddViewModel() : ViewModel() {
 
     fun removeDataFromRepo() {
 
+        if (filledModel.isDone)
+            _counterToDo.value = _counterToDo.value!! - 1
+
         toDoRepo.removeItemById(filledModel.id)
 
     }
@@ -97,9 +98,7 @@ class HomeAndAddViewModel() : ViewModel() {
 
     fun nextId() {
 
-        val number = idCount.toInt()
-        val incrementedNumber = number + 1
-        this.idCount = incrementedNumber.toString()
+        toDoRepo.nextId()
 
     }
 
