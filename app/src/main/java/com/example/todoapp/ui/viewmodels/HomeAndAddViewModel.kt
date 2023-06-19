@@ -117,12 +117,11 @@ class HomeAndAddViewModel() : ViewModel() {
 
     }
 
-    fun backToTheRepo(position: Int) {
+    fun backToTheRepo() {
 
         if (filledModel.isDone)
             _counterToDo.value = _counterToDo.value!! + 1
-
-        toDoRepo.back(position, filledModel)
+        toDoRepo.back(filledModel)
 
     }
 

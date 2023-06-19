@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -20,10 +21,11 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
+import com.example.todoapp.data.ToDoItem
 import com.example.todoapp.databinding.FragmentHomeBinding
-import com.example.todoapp.ui.util.OnItemListener
 import com.example.todoapp.ui.activity.MainActivity
 import com.example.todoapp.ui.adapters.ToDoAdapter
+import com.example.todoapp.ui.util.OnItemListener
 import com.example.todoapp.ui.util.SwipeGesture
 import com.example.todoapp.ui.viewmodels.HomeAndAddViewModel
 import com.google.android.material.snackbar.BaseTransientBottomBar
@@ -67,7 +69,7 @@ class HomeFragment : Fragment(), OnItemListener {
 
         homeViewModel.toDoList.observe(viewLifecycleOwner) {
 
-            toDoList -> adapter.setData(homeViewModel.toDoList.value!!)
+                toDoList -> adapter.setData(homeViewModel.toDoList.value!!)
 
         }
 
@@ -100,7 +102,7 @@ class HomeFragment : Fragment(), OnItemListener {
 
     fun floatButtonInit() {
         _binding!!.editAddFragmentButton.setOnClickListener {
-         findNavController().navigate(R.id.nav_gallery)
+            findNavController().navigate(R.id.nav_gallery)
             homeViewModel.setStateFlag(2)
         }
     }
@@ -141,7 +143,7 @@ class HomeFragment : Fragment(), OnItemListener {
             R.id.info_option -> {
 
 
-               openInfoFragment()
+                openInfoFragment()
 
                 return true
             }
@@ -172,6 +174,7 @@ class HomeFragment : Fragment(), OnItemListener {
 
     private fun swipeToGesture(itemRv: RecyclerView?) {
 
+
         val swipeGesture=object : SwipeGesture(requireContext()) {
             override fun onMove(
                 recyclerView: RecyclerView,
@@ -191,7 +194,7 @@ class HomeFragment : Fragment(), OnItemListener {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
 
-                val position=viewHolder.absoluteAdapterPosition
+                val position = viewHolder.absoluteAdapterPosition
 
                 var actionBtnTapped = false
 
@@ -201,55 +204,65 @@ class HomeFragment : Fragment(), OnItemListener {
 
                         ItemTouchHelper.LEFT-> {
 
-                            homeViewModel.setFilledModel(homeViewModel.toDoList.value!![position])
-                            homeViewModel.removeDataFromRepoByPosition(position)
+                            Log.d("DO", (itemRv!!.adapter as? ToDoAdapter)!!.todoList.toString())
 
+                            homeViewModel.setFilledModel((itemRv!!.adapter as? ToDoAdapter)!!.todoList[position])
+
+                            homeViewModel.removeDataFromRepo()
+
+                            if (binding.showHiddenButton.isChecked)
+                                homeViewModel.toDoList.value?.let { it1 -> adapter.setData(it1.filter { !it.isDone }) }
+                            else
                                 adapter.notifyItemRemoved(position)
 
-                            val snackBar = Snackbar.make(
+                            Log.d("POSLE", (itemRv!!.adapter as? ToDoAdapter)!!.todoList.toString())
 
-                               this@HomeFragment.recyclerView, "Item Deleted", Snackbar.LENGTH_LONG
-
-                            ).addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-
-                                    super.onDismissed(transientBottomBar, event)
-
-                                }
-                                override fun onShown(transientBottomBar: Snackbar?) {
-                                    transientBottomBar?.setAction("UNDO") {
-
-                                        homeViewModel.backToTheRepo(position)
-                                        adapter.notifyItemInserted(position)
-                                        homeViewModel.removeFilledModel()
-
-                                        actionBtnTapped = true
-
-                                    }
-
-                                    super.onShown(transientBottomBar)
-
-                                }
-                            }).apply {
-
-                                animationMode = Snackbar.ANIMATION_MODE_FADE
-
-                            }
-
-                            snackBar.setActionTextColor(
-                                ContextCompat.getColor(
-                                    requireContext(),
-                                    R.color.red
-                                )
-                            )
-
-                            snackBar.show()
+//                            val snackBar = Snackbar.make(
+//
+//                                this@HomeFragment.recyclerView, "Item Deleted", Snackbar.LENGTH_LONG
+//
+//                            ).addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+//                                override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+//
+//                                    super.onDismissed(transientBottomBar, event)
+//
+//                                }
+//                                override fun onShown(transientBottomBar: Snackbar?) {
+//                                    transientBottomBar?.setAction("UNDO") {
+//
+//                                        homeViewModel.backToTheRepo()
+//                                        adapter.notifyItemInserted(0)
+//                                        homeViewModel.removeFilledModel()
+//
+//                                        actionBtnTapped = true
+//
+//                                    }
+//
+//                                    super.onShown(transientBottomBar)
+//
+//                                }
+//                            }).apply {
+//
+//                                animationMode = Snackbar.ANIMATION_MODE_FADE
+//
+//                            }
+//
+//                            snackBar.setActionTextColor(
+//                                ContextCompat.getColor(
+//                                    requireContext(),
+//                                    R.color.red
+//                                )
+//                            )
+//
+//                            snackBar.show()
                         }
 
                         ItemTouchHelper.RIGHT-> {
 
-                            homeViewModel.toDoList.value?.get(position)
-                                ?.let { homeViewModel.setFilledModel(it) }
+                            Log.d("vdlx", (itemRv!!.adapter as? ToDoAdapter)!!.todoList.toString())
+                            if (binding.showHiddenButton.isChecked)
+                                homeViewModel.toDoList.value?.let { it1 -> adapter.setData(it1.filter { !it.isDone }) }
+                            homeViewModel.setFilledModel((itemRv!!.adapter as? ToDoAdapter)!!.todoList[position])
                             openInfoFragment()
                             adapter.notifyItemChanged(position)
                             actionBtnTapped = true
@@ -277,7 +290,7 @@ class HomeFragment : Fragment(), OnItemListener {
 
         if (isChecked) {
 
-           val activ = requireActivity()
+            val activ = requireActivity()
             (activ as? MainActivity)?.party()
 
             homeViewModel.incrementCounterToDo()

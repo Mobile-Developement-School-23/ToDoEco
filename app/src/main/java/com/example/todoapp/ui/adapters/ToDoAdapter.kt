@@ -10,6 +10,7 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.data.ToDoItem
 import com.example.todoapp.R
@@ -18,7 +19,7 @@ import com.example.todoapp.ui.util.MyDiffUtil
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ToDoAdapter(private val context: Context, private var todoList: List<ToDoItem>, private  val listener: OnItemListener) :
+class ToDoAdapter(private val context: Context, public var todoList: List<ToDoItem>, private  val listener: OnItemListener) :
     RecyclerView.Adapter<ToDoAdapter.ViewHolder>() {
 
 

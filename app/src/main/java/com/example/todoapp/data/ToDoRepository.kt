@@ -74,9 +74,9 @@ class ToDoRepository {
 
     }
 
-    fun back(position: Int, filledModel: ToDoItem) {
+    fun back(filledModel: ToDoItem) {
 
-        todoList.add(position, filledModel)
+        todoList.add(0, filledModel)
 
     }
 
