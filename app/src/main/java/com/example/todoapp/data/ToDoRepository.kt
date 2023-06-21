@@ -1,22 +1,22 @@
 package com.example.todoapp.data
-
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
+import com.example.todoapp.exceptions.TaskNotFoundException
+import java.util.ArrayList
 import java.util.Collections
 import java.util.Date
-import kotlin.properties.Delegates
+
+typealias ToDoListener = (users: List<ToDoItem>) -> Unit
 
 class ToDoRepository {
 
-    private var todoList: MutableList<ToDoItem> = mutableListOf()
-    private var _id: String = "11"
-    val id : String get() = _id
+    private var todoList: MutableList<ToDoItem> = mutableListOf() // коррект
 
-    init {
+    private val listeners = mutableSetOf<ToDoListener>()
+
+    private var _id: String = "1" // коррект
+    val id : String get() = _id // коррект
+
+    init { // коррект
 
         addItem(ToDoItem("1", "Complete project report", ToDoItem.Importance.NORMAL, Date(), false, Date(), null))
         addItem(ToDoItem("2", "Buy groceries", ToDoItem.Importance.LOW, null, false, Date(), null))
@@ -31,68 +31,129 @@ class ToDoRepository {
 
     }
 
-    fun getToDoListFlow(): List<ToDoItem> {
+    fun getToDoList(): List<ToDoItem> { // коррект
 
-        return todoList
-
-    }
-
-
-    fun addItem(task: ToDoItem) {
-
-        todoList.add(task)
+        return todoList // коррект
 
     }
 
-    fun removeItemById(id : String) {
 
-        todoList.removeIf { item -> item.id == id }
+    fun addItem(toDoItem: ToDoItem) { // коррект
 
-    }
+        // добавление нового элемента полностью
 
-    fun saveDataItemById(id: String, filledModel: ToDoItem) {
+        toDoItem.id = this.id
 
-        val index = todoList.indexOfFirst { it.id == id }
-
-        if (index != -1) {
-
-            todoList[index] = filledModel
-
-        }
-
-    }
-
-    fun setCheckStatus(position: Int, isChecked: Boolean) {
-
-        todoList[position].isDone = isChecked
-
-    }
-
-    fun removeItemByPosition(position: Int) {
-
-        todoList.removeAt(position)
-
-    }
-
-    fun back(filledModel: ToDoItem) {
-
-        todoList.add(0, filledModel)
-
-    }
-
-    fun swapElements(position_from: Int, position_to: Int) {
-
-        Collections.swap(todoList, position_from, position_to)
-
-    }
-
-    fun nextId() {
+        todoList = ArrayList(todoList)
+        todoList.add(toDoItem) // коррект
 
         val number = _id.toInt()
         val incrementedNumber = number + 1
         this._id = incrementedNumber.toString()
 
+    } // коррект
+
+    fun removeItem(toDoItem: ToDoItem) { // коррект
+
+        val indexToDelete = todoList.indexOfFirst { it.id == toDoItem.id }
+
+        if (indexToDelete != -1) {
+
+            todoList = ArrayList(todoList)
+            todoList.removeAt(indexToDelete)
+            notifyChanges()
+
+        }
+
     }
+
+    fun saveData(toDoItem: ToDoItem) {
+
+        val index = todoList.indexOfFirst { it.id == toDoItem.id }
+
+        if (index != -1) {
+
+            todoList = ArrayList(todoList)
+            todoList[index] = toDoItem
+            notifyChanges()
+
+        }
+
+    }
+
+    fun setCheckStatus(item: ToDoItem, isChecked: Boolean) {
+
+        val index = todoList.indexOfFirst { it.id == item.id }
+
+        if (index != -1) {
+
+            todoList = ArrayList(todoList)
+            todoList[index].isDone = isChecked
+            notifyChanges()
+
+        }
+
+        notifyChanges()
+
+    }
+
+    fun addListener(listener: ToDoListener) {
+
+        listeners.add(listener)
+        listener.invoke(todoList)
+
+    }
+
+    fun removeListener(listener: ToDoListener) {
+
+        listeners.remove(listener)
+
+    }
+
+    private fun notifyChanges() {
+
+        listeners.forEach { it.invoke(todoList) }
+
+    }
+
+     fun getToDoItemById(id : String) : ToDoItem {
+
+        val index = todoList.indexOfFirst { it.id == id }
+
+         val toDoItem : ToDoItem
+         if (index != -1) {
+
+             toDoItem = todoList[index]
+             return toDoItem
+
+         }
+         else
+             throw TaskNotFoundException()
+
+    }
+
+    fun swapElements(item1: ToDoItem, item2: ToDoItem) {
+
+        val index1 = todoList.indexOfFirst { it.id == item1.id }
+        val index2 = todoList.indexOfFirst { it.id == item2.id }
+
+        todoList = ArrayList(todoList)
+        todoList[index1] = item2
+        todoList[index2] = item1
+
+        notifyChanges()
+
+    }
+
+    fun itemBack(item: ToDoItem) {
+
+        todoList = ArrayList(todoList)
+        todoList.add(0, item)
+
+        notifyChanges()
+
+    }
+
 
 }
 

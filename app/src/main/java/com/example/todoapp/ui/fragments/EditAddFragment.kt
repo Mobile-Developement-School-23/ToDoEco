@@ -7,13 +7,17 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
 import com.example.todoapp.R
 import com.example.todoapp.data.ToDoItem
 import com.example.todoapp.databinding.FragmentEditBinding
-import com.example.todoapp.ui.viewmodels.HomeAndAddViewModel
+import com.example.todoapp.ui.util.factory
+import com.example.todoapp.ui.viewmodels.EditAddViewModel
+import com.example.todoapp.ui.viewmodels.HomeViewModel
 import java.util.Calendar
 import java.util.Date
 
@@ -21,10 +25,8 @@ import java.util.Date
 class EditAddFragment : Fragment() {
 
     private var _binding: FragmentEditBinding? = null
-
     private val binding get() = _binding!!
-
-    private val homeAndAddViewModel: HomeAndAddViewModel by activityViewModels()
+    private val editAddViewModel: EditAddViewModel by viewModels { factory() }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,11 +37,19 @@ class EditAddFragment : Fragment() {
         _binding = FragmentEditBinding.inflate(inflater, container, false)
 
         val root: View = binding.root
+
+        arguments?.let {
+
+            editAddViewModel.setItemById(it.getString("TASK_ID").toString())
+            editAddViewModel.setFlag(it.getInt("SAVE_OR_EDIT_FLAG"))
+
+        }
+
         init()
+
         return root
 
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         super.onViewCreated(view, savedInstanceState)
@@ -55,45 +65,50 @@ class EditAddFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
 
     }
-
-
     override fun onDestroyView() {
 
         super.onDestroyView()
         _binding = null
 
     }
-
     private fun init() {
 
         // в зависимости от того, хочет ли пользователь установить дедлайн -
         // показать и скрыть календарь
 
         binding.showCalendar.setOnCheckedChangeListener { _, isChecked ->
+
             if (isChecked) {
+
                 binding.myDeadlineDatePicker.visibility = View.VISIBLE
+
             } else {
+
                 binding.myDeadlineDatePicker.visibility = View.GONE
+
             }
+
         }
 
         // заполнение данных по объекту из ViewModel
 
-        val text = homeAndAddViewModel.getFilledModel().text
+        val text = editAddViewModel.toDoItem.text
 
         binding.descriptionInput.setText(text)
 
-        val importance = homeAndAddViewModel.getFilledModel().importance
-        val deadline : Date? = homeAndAddViewModel.getFilledModel().deadline
+        val importance = editAddViewModel.toDoItem.importance
+        val deadline : Date? = editAddViewModel.toDoItem.deadline
 
 
         when (importance) {
+
             ToDoItem.Importance.LOW -> _binding!!.toggleButtonImportance
                 .check(_binding!!.slowButton.id)
             ToDoItem.Importance.NORMAL -> _binding!!.toggleButtonImportance
                 .check(_binding!!.normalButton.id)
             ToDoItem.Importance.URGENT -> _binding!!.toggleButtonImportance
                 .check(_binding!!.urgentlyButton.id)
+
         }
 
         if (deadline != null) {
@@ -129,16 +144,14 @@ class EditAddFragment : Fragment() {
 
         binding.saveButton.setOnClickListener {
 
+            if (editAddViewModel.saveOrCreateFlag == 1) { // сохранить старую заметку
 
-
-            if (homeAndAddViewModel.getStateFlag() == 1) {
-
-                fillOldModel()
+                fillModel()
                 showSaveWarningDialog()
 
-            } else if (homeAndAddViewModel.getStateFlag() == 2) {
+            } else if (editAddViewModel.saveOrCreateFlag == 2) { // создать новую заметку
 
-                fillNewModel()
+                fillModel()
                 showNewSaveWarningDialog()
 
             }
@@ -149,11 +162,11 @@ class EditAddFragment : Fragment() {
 
         binding.removeButton.setOnClickListener {
 
-            if (homeAndAddViewModel.getStateFlag() == 1) {
+            if (editAddViewModel.saveOrCreateFlag == 1) {
 
                 showRemoveWarningDialog()
 
-            } else if (homeAndAddViewModel.getStateFlag() == 2) {
+            } else if (editAddViewModel.saveOrCreateFlag == 2) {
 
                 showCancelWarningDialog()
 
@@ -172,7 +185,6 @@ class EditAddFragment : Fragment() {
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton("OK") { dialog, _ ->
 
-                homeAndAddViewModel.removeFilledModel()
                 Navigation.findNavController(binding.root).navigate(R.id.nav_home)
 
             }
@@ -195,8 +207,7 @@ class EditAddFragment : Fragment() {
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton("OK") { dialog, _ ->
 
-                homeAndAddViewModel.saveDataToRepo()
-                homeAndAddViewModel.removeFilledModel()
+                editAddViewModel.saveTask()
                 Navigation.findNavController(binding.root).navigate(R.id.nav_home)
 
             }
@@ -219,9 +230,8 @@ class EditAddFragment : Fragment() {
             .setPositiveButton("OK") { dialog, _ ->
 
 
-                homeAndAddViewModel.removeDataFromRepo()
+                editAddViewModel.deleteTask()
 
-                homeAndAddViewModel.removeFilledModel()
 
                 Navigation.findNavController(binding.root).navigate(R.id.nav_home)
 
@@ -244,10 +254,7 @@ class EditAddFragment : Fragment() {
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton("OK") { dialog, _ ->
 
-                homeAndAddViewModel.addDataToRepo()
-                Log.d("ADDATATOREPO", homeAndAddViewModel.toDoList.value.toString())
-                homeAndAddViewModel.nextId()
-                homeAndAddViewModel.removeFilledModel()
+                editAddViewModel.addTask()
                 Navigation.findNavController(binding.root).navigate(R.id.nav_home)
 
             }
@@ -260,18 +267,26 @@ class EditAddFragment : Fragment() {
 
     }
 
-    private fun fillOldModel() {
+    private fun fillModel() {
 
-        // id не меняется, как и дата создания
+        val creationDate = Calendar.getInstance().time
 
         val modificationDate = Calendar.getInstance().time
 
-        val calendar : Calendar = Calendar.getInstance()
-        calendar.set(binding.myDeadlineDatePicker.year,
-            binding.myDeadlineDatePicker.month,
-            binding.myDeadlineDatePicker.dayOfMonth)
+        var deadline: Date? = null
 
-        val deadline : Date = calendar.time
+        if (binding.showCalendar.isChecked) {
+
+            val calendar
+                    : Calendar = Calendar.getInstance()
+            calendar.set(
+                binding.myDeadlineDatePicker.year,
+                binding.myDeadlineDatePicker.month,
+                binding.myDeadlineDatePicker.dayOfMonth
+            )
+
+            deadline = calendar.time
+        }
 
        val taskText = binding.descriptionInput.text.toString()
 
@@ -284,51 +299,36 @@ class EditAddFragment : Fragment() {
 
         }
 
-        val newToDOItem : ToDoItem = ToDoItem(homeAndAddViewModel.getFilledModel().id,
-            taskText, importance, deadline, homeAndAddViewModel.getFilledModel().isDone,
-            homeAndAddViewModel.getFilledModel().creationDate, modificationDate)
+        val newToDoItem : ToDoItem
 
-        homeAndAddViewModel.setFilledModel(newToDOItem)
+        if (editAddViewModel.saveOrCreateFlag == 2) {
 
-    }
+            newToDoItem = ToDoItem("0",
+                taskText, importance, deadline, false,
+                creationDate, null)
+        } else {
 
-    private fun fillNewModel() {
-
-        val creationDate = Calendar.getInstance().time
-
-        var deadline: Date? = null
-
-        if (binding.showCalendar.isChecked) {
-
-                    val calendar
-                            : Calendar = Calendar.getInstance()
-                    calendar.set(
-                        binding.myDeadlineDatePicker.year,
-                        binding.myDeadlineDatePicker.month,
-                        binding.myDeadlineDatePicker.dayOfMonth
-                    )
-
-                    deadline = calendar.time
-                }
-
-
-        val taskText = binding.descriptionInput.text.toString()
-
-        val importance = when (binding.toggleButtonImportance.checkedButtonId) {
-
-            R.id.slowButton -> ToDoItem.Importance.LOW
-            R.id.normalButton -> ToDoItem.Importance.NORMAL
-            R.id.urgentlyButton -> ToDoItem.Importance.URGENT
-            else -> ToDoItem.Importance.NORMAL
+            newToDoItem = ToDoItem(
+                editAddViewModel.toDoItem.id,
+                taskText, importance, deadline, editAddViewModel.toDoItem.isDone,
+                editAddViewModel.toDoItem.creationDate, modificationDate
+            )
 
         }
 
-        val newToDOItem : ToDoItem = ToDoItem(homeAndAddViewModel.getFilledModel().id,
-            taskText, importance, deadline, false,
-            creationDate, homeAndAddViewModel.getFilledModel().modificationDate)
-
-        homeAndAddViewModel.setFilledModel(newToDOItem)
+        editAddViewModel.setItemByObject(newToDoItem)
 
     }
+
+    companion object {
+
+        fun newInstance(bundle: Bundle): EditAddFragment {
+            val fragment = EditAddFragment()
+            fragment.arguments = bundle
+            return fragment
+        }
+
+    }
+
 
 }

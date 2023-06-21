@@ -1,119 +1,140 @@
 package com.example.todoapp.ui.adapters
 
-import android.content.Context
 import android.graphics.Color
 import android.graphics.Paint
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.PopupMenu
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.data.ToDoItem
 import com.example.todoapp.R
-import com.example.todoapp.ui.util.OnItemListener
+import com.example.todoapp.databinding.ToDoLayoutBinding
 import com.example.todoapp.ui.util.MyDiffUtil
+import com.example.todoapp.ui.util.factory
+import com.example.todoapp.ui.viewmodels.HomeViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
-class ToDoAdapter(private val context: Context, public var todoList: List<ToDoItem>, private  val listener: OnItemListener) :
-    RecyclerView.Adapter<ToDoAdapter.ViewHolder>() {
+interface ToDoActionListener {
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    fun onToDoItemDelete(todoItem: ToDoItem)
 
-        val inflater = LayoutInflater.from(parent.context)
-        val view = inflater.inflate(R.layout.to_do_layout, parent, false)
+    fun onEditTask(todoItem: ToDoItem)
 
-//        view.setOnLongClickListener {
-//
-//            v -> v.showContextMenu()
-//            true
-//        }
+    fun onCheckTask(todoItem: ToDoItem, isChecked: Boolean)
 
-        return ViewHolder(view)
+    fun onLongClick(todoItem: ToDoItem)
 
-    }
+    fun onToDoItemCopy(todoItem: ToDoItem)
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+    fun onToDoItemInfo(todoItem: ToDoItem)
 
-        holder.completionStatus.setOnCheckedChangeListener(null)
+}
 
-        val todoItem = todoList[position]
-        holder.itemView.setOnClickListener {
-            listener.onItemClick(position)
+class ToDoAdapter( private val actionListener: ToDoActionListener ) :
+    RecyclerView.Adapter<ToDoAdapter.ToDoViewHolder>(), View.OnClickListener {
+
+    var toDoList: List<ToDoItem> = emptyList()
+
+        set(newValue) {
+
+            val diffCallBack = MyDiffUtil(field, newValue)
+            val diffResult = DiffUtil.calculateDiff(diffCallBack, true)
+            field = newValue
+            diffResult.dispatchUpdatesTo(this)
+
         }
 
-        holder.bind(todoItem)
+    override fun onClick(v: View) {
 
-    }
+        val todoItem = v.tag as ToDoItem
 
+        when(v.id) {
 
-    override fun getItemCount(): Int {
-        return todoList.size
-    }
+            R.id.hamburger -> {
 
-    fun getItem(position: Int) : ToDoItem {
-        return todoList[position]
-    }
-
-    inner class ViewHolder(itemView: View) :
-        RecyclerView.ViewHolder(itemView) {
-
-        private val layout : View = itemView.findViewById(R.id.positionLayout)
-        private val todoText: TextView = itemView.findViewById(R.id.task)
-        private val deadline: TextView = itemView.findViewById(R.id.deadline)
-        private val importanceIndicator: ImageView = itemView.findViewById(R.id.importance)
-         val completionStatus: CheckBox = itemView.findViewById(R.id.doOrNo)
-
-
-        fun bind(todoItem: ToDoItem) {
-
-            val isChecked = todoItem.isDone
-
-            completionStatus.isChecked = todoItem.isDone
-
-            if (isChecked) {
-
-                todoText.paintFlags = todoText.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                todoText.setTextColor(Color.GRAY)
-
-            } else {
-
-                todoText.paintFlags = todoText.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                todoText.setTextColor(Color.rgb(59, 58, 54))
+                showPopUpMenu(v)
 
             }
 
-            completionStatus.setOnCheckedChangeListener { _, isChecked ->
+            else -> { actionListener.onEditTask(todoItem) }
 
-                val position = absoluteAdapterPosition
+        }
+
+    }
+
+    override fun getItemCount(): Int = toDoList.size
+
+    fun getItem(position: Int) : ToDoItem = toDoList[position]
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
+
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = ToDoLayoutBinding.inflate(inflater, parent, false)
+        binding.root.setOnClickListener(this)
+        binding.hamburger.setOnClickListener(this)
+
+        return ToDoViewHolder(binding)
+
+    }
+
+    override fun onBindViewHolder(holder: ToDoViewHolder, position: Int) {
+
+        holder.binding.doOrNo.setOnCheckedChangeListener(null)
+
+        val todoItem = toDoList[position]
+
+
+        with(holder.binding) {
+
+            holder.itemView.tag = todoItem
+            hamburger.tag = todoItem
+
+            val isChecked = todoItem.isDone
+
+            doOrNo.isChecked = isChecked
+
+            if (isChecked) {
+
+                task.paintFlags = task.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                task.setTextColor(Color.GRAY)
+
+            } else {
+
+                task.paintFlags = task.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                task.setTextColor(Color.rgb(59, 58, 54))
+
+            }
+
+            doOrNo.setOnCheckedChangeListener { _, isChecked ->
 
                 if (position != RecyclerView.NO_POSITION) {
 
-                    listener.onCheckBoxClicked(position, isChecked)
+                    actionListener.onCheckTask(todoItem, isChecked)
 
                 }
 
                 if (isChecked) {
 
-                    todoText.paintFlags = todoText.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-                    todoText.setTextColor(Color.GRAY)
+                    task.paintFlags = task.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                    task.setTextColor(Color.GRAY)
 
                 } else {
 
-                    todoText.paintFlags = todoText.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-                    todoText.setTextColor(Color.rgb(59, 58, 54))
+                    task.paintFlags = task.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                    task.setTextColor(Color.rgb(59, 58, 54))
 
                 }
 
             }
 
-
-            todoText.text = todoItem.text
+            task.text = todoItem.text
 
             val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
@@ -136,30 +157,65 @@ class ToDoAdapter(private val context: Context, public var todoList: List<ToDoIt
 
             }
 
-            importanceIndicator.setImageResource(importanceIcon)
-
-            val position = absoluteAdapterPosition
-
-            layout.setOnLongClickListener {
-
-                    it.showContextMenu()
-                listener.longClickPrepare(position)
-
-                true
-
-            }
+            importance.setImageResource(importanceIcon)
 
         }
 
-    }
-
-    fun setData(newToDoList : List<ToDoItem>) {
-
-        val diffUtil = MyDiffUtil(oldList = todoList, newList = newToDoList)
-        val diffResults = DiffUtil.calculateDiff(diffUtil)
-        todoList = newToDoList
-        diffResults.dispatchUpdatesTo(this)
 
     }
+
+
+    private fun showPopUpMenu(view: View) {
+
+        val popupMenu = PopupMenu(view.context, view)
+        val context = view.context
+
+        val todoItem = view.tag as ToDoItem
+
+        popupMenu.menu.add(0, ID_COPY, Menu.NONE, context.getString(R.string.copy))
+
+        popupMenu.menu.add(0, ID_INFO, Menu.NONE, context.getString(R.string.info))
+
+        popupMenu.menu.add(0, ID_REMOVE, Menu.NONE, context.getString(R.string.remove))
+
+        popupMenu.setOnMenuItemClickListener {
+            when (it.itemId) {
+
+                ID_COPY -> {
+
+                    actionListener.onToDoItemCopy(todoItem)
+
+                }
+                ID_INFO -> {
+
+                    actionListener.onToDoItemInfo(todoItem)
+
+                }
+                ID_REMOVE -> {
+
+                    actionListener.onToDoItemDelete(todoItem)
+
+                }
+
+            }
+
+            return@setOnMenuItemClickListener true
+        }
+
+        popupMenu.show()
+
+    }
+
+
+    companion object {
+
+        private const val ID_COPY = 1
+        private const val ID_INFO = 2
+        private const val ID_REMOVE = 3
+
+    }
+
+     class ToDoViewHolder( val binding : ToDoLayoutBinding
+     ) : RecyclerView.ViewHolder(binding.root)
 
 }

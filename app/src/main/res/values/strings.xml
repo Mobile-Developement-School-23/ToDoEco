@@ -38,4 +38,7 @@
 
     <string name="text_example">Sample task text that can occupy multiple lines. If more than three lines, it will be truncated with an ellipsis.</string>
 
+    <string name="copy">Copy task text</string>
+    <string name="info">See more info...</string>
+
 </resources>
