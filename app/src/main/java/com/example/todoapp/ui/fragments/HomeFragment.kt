@@ -3,8 +3,6 @@ package com.example.todoapp.ui.fragments
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.IntentFilter
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,7 +12,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -220,8 +217,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
                 if (isChecked) {
 
-                    val activ = requireActivity()
-                    (activ as? MainActivity)?.party()
+                    val fragmentActivity = requireActivity()
+                    (fragmentActivity as? MainActivity)?.party()
 
                     homeViewModel.incrementCounterToDo()
 

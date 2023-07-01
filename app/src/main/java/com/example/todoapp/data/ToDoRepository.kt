@@ -15,12 +15,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import retrofit2.Response
 import java.util.UUID
 
 class ToDoRepository(
 
-    private val db: ToDoDatabase, private val context : Context
+    private val db: ToDoDatabase,
+    private val context : Context
 
 ) {
 
@@ -35,7 +37,9 @@ class ToDoRepository(
 
         try {
 
-            val response = RetrofitInstance.api.getList()
+            val response = withContext(Dispatchers.IO) {
+                RetrofitInstance.api.getList()
+            }
 
             if (response.isSuccessful) {
 
@@ -46,8 +50,6 @@ class ToDoRepository(
                     saveDataToLocalDb(resultResponse.list.toEntityList())
 
                     sharedPreferencesHelper.addInt("LAST_REVISION", resultResponse.revision)
-                    Log.d("POLOSHILI_REVISIU", sharedPreferencesHelper
-                        .getInt("LAST_REVISION").toString())
 
                     emit(Resource.Success(resultResponse.list.toEntityList()))
 
@@ -75,10 +77,9 @@ class ToDoRepository(
 
         return try {
 
-            val response = RetrofitInstance.api.deleteListItem(
-                sharedPreferencesHelper
-                .getInt("LAST_REVISION"),
-                UUID.fromString(id))
+            val response = withContext(Dispatchers.IO) {
+                RetrofitInstance.api.deleteListItem(sharedPreferencesHelper.getInt("LAST_REVISION"), UUID.fromString(id))
+            }
 
             if (response.isSuccessful) {
 
@@ -86,6 +87,7 @@ class ToDoRepository(
 
                 if (resultResponse != null) {
 
+                    sharedPreferencesHelper.addInt("LAST_REVISION", resultResponse.revision)
                     Resource.Success(resultResponse)
 
                 } else {
@@ -112,12 +114,12 @@ class ToDoRepository(
 
         return try {
 
-            Log.d("REVISIA", sharedPreferencesHelper
-                .getInt("LAST_REVISION").toString())
-            Log.d("OSHIBKA", newPosition.toString())
-
-            val response = RetrofitInstance.api.addItemToList(sharedPreferencesHelper
-                .getInt("LAST_REVISION"), newPosition.toRequest())
+            val response = withContext(Dispatchers.IO) {
+                RetrofitInstance.api.addItemToList(
+                    sharedPreferencesHelper.getInt("LAST_REVISION"),
+                    newPosition.toRequest()
+                )
+            }
 
             if (response.isSuccessful) {
 
@@ -125,6 +127,7 @@ class ToDoRepository(
 
                 if (resultResponse != null) {
 
+                    sharedPreferencesHelper.addInt("LAST_REVISION", resultResponse.revision)
                     Resource.Success(resultResponse)
 
                 } else {
@@ -134,8 +137,6 @@ class ToDoRepository(
                 }
 
             } else {
-
-                Log.d("OSHIBKA", response.message())
 
                 Resource.Error("Request failed with ${response.code()}: ${response.message()}")
 
@@ -152,8 +153,12 @@ class ToDoRepository(
 
         return try {
 
-            val response = RetrofitInstance.api.updateList(sharedPreferencesHelper
-                .getInt("LAST_REVISION"), TaskListRequest("ok", newList.toResponseList()) )
+            val response = withContext(Dispatchers.IO) {
+                RetrofitInstance.api.updateList(
+                    sharedPreferencesHelper.getInt("LAST_REVISION"),
+                    TaskListRequest("ok", newList.toResponseList())
+                )
+            }
 
             if (response.isSuccessful) {
 
@@ -161,6 +166,7 @@ class ToDoRepository(
 
                 if (resultResponse != null) {
 
+                    sharedPreferencesHelper.addInt("LAST_REVISION", resultResponse.revision)
                     Resource.Success(resultResponse)
 
                 } else {
@@ -170,8 +176,6 @@ class ToDoRepository(
                 }
 
             } else {
-
-                Log.d("OSHIBKA", response.message())
 
                 Resource.Error("Request failed with ${response.code()}: ${response.message()}")
 
@@ -188,9 +192,14 @@ class ToDoRepository(
 
         return try {
 
-            val response = RetrofitInstance.api.changeListItem(sharedPreferencesHelper.getInt("LAST_REVISION"),
-                UUID.fromString(id),
-                changePosition.toRequest())
+            val response = withContext(Dispatchers.IO) {
+                RetrofitInstance.api.changeListItem(
+                    sharedPreferencesHelper.getInt("LAST_REVISION"),
+                    UUID.fromString(id),
+                    changePosition.toRequest()
+                )
+            }
+
 
             if (response.isSuccessful) {
 
@@ -198,6 +207,7 @@ class ToDoRepository(
 
                 if (resultResponse != null) {
 
+                    sharedPreferencesHelper.addInt("LAST_REVISION", resultResponse.revision)
                     Resource.Success(resultResponse)
 
                 } else {
@@ -230,21 +240,19 @@ class ToDoRepository(
     suspend fun deleteFromLocalDb(id: String) {
 
         db.getToDoDao().deleteItemById(id)
-        deleteFromInternet(id)
 
     }
 
     suspend fun addToLocalDb(item: ToDoItemEntity) {
 
         db.getToDoDao().insertItem(item)
-        addToInternet(item)
 
     }
 
     suspend fun updateLocalDbItem(item: ToDoItemEntity) {
 
         db.getToDoDao().updateItem(item)
-        changeOnInternet(item.id, item)
+
     }
 
     suspend fun getItemById(id : String) = db.getToDoDao().getItemById(id)
