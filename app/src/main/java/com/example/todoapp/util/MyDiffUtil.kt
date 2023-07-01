@@ -1,12 +1,11 @@
-package com.example.todoapp.ui.util
+package com.example.todoapp.util
 
-import android.util.Log
 import androidx.recyclerview.widget.DiffUtil
-import com.example.todoapp.data.ToDoItem
+import com.example.todoapp.db.ToDoItemEntity
 
 class MyDiffUtil(
-    private val oldList: List<ToDoItem>,
-    private val newList: List<ToDoItem>
+    private val oldList: List<ToDoItemEntity>,
+    private val newList: List<ToDoItemEntity>
 ) : DiffUtil.Callback() {
 
     override fun getOldListSize(): Int {

@@ -36,9 +36,11 @@
     <string name="author">.arinstotle</string>
     <string name="author_email">huvian11@mail.ru</string>
 
-    <string name="text_example">Sample task text that can occupy multiple lines. If more than three lines, it will be truncated with an ellipsis.</string>
+    <string name="text_example">Sample.</string>
 
     <string name="copy">Copy task text</string>
     <string name="info">See more info...</string>
+    <string name="plant_logo">Plant logo</string>
+    <string name="edit_or_add_task">Edit or add task</string>
 
 </resources>

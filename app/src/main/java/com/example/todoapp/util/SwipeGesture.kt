@@ -1,4 +1,4 @@
-package com.example.todoapp.ui.util
+package com.example.todoapp.util
 
 import android.content.Context
 import android.graphics.Canvas
@@ -8,8 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.R
 import it.xabaras.android.recyclerview.swipedecorator.RecyclerViewSwipeDecorator
 
-abstract class SwipeGesture(context: Context): ItemTouchHelper.SimpleCallback(
-    ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END,
+abstract class SwipeGesture(context: Context): ItemTouchHelper.SimpleCallback(0,
     ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
 ) {
     private val deleteColor= ContextCompat.getColor(context, R.color.red)

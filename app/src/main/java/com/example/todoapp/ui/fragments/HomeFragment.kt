@@ -3,6 +3,8 @@ package com.example.todoapp.ui.fragments
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,27 +15,30 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.todoapp.R
-import com.example.todoapp.data.ToDoItem
-import com.example.todoapp.data.ToDoListener
 import com.example.todoapp.databinding.FragmentHomeBinding
+import com.example.todoapp.db.ToDoItemEntity
 import com.example.todoapp.ui.activity.MainActivity
 import com.example.todoapp.ui.adapters.ToDoActionListener
 import com.example.todoapp.ui.adapters.ToDoAdapter
-import com.example.todoapp.ui.util.SwipeGesture
-import com.example.todoapp.ui.util.factory
+import com.example.todoapp.util.factory
 import com.example.todoapp.ui.viewmodels.HomeViewModel
+import com.example.todoapp.util.Resource
+import com.example.todoapp.util.SwipeGesture
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
 
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -46,8 +51,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var navController: NavController
 
-    private val toDoListener: ToDoListener = {
-        adapter.toDoList = it }
+//    private lateinit var networkChangeReceiver: NetworkChangeReceiver
 
 
     override fun onCreateView(
@@ -56,16 +60,23 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
 
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        val root: View = binding.root
+
         navController = findNavController()
 
-        homeViewModel.counterToDo.observe(viewLifecycleOwner) {
+        viewLifecycleOwner.lifecycleScope.launch {
 
-            binding.doneText.text = "Done - ${homeViewModel.counterToDo.value}"
+            homeViewModel.counterToDo.collect {
+
+                binding.doneText.text = "Done - ${it}"
+
+            }
 
         }
 
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+        binding.swipe.setOnRefreshListener(this)
+//        networkChangeReceiver = NetworkChangeReceiver()
 
         recyclerViewInit()
         floatButtonInit()
@@ -75,24 +86,81 @@ class HomeFragment : Fragment() {
 
     }
 
-    fun hiddenButtonInit() {
+//    override fun onStart() {
+//        super.onStart()
+//        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+//        requireActivity().registerReceiver(networkChangeReceiver, filter)
+//
+//        networkChangeReceiver.isConnected.observe(this, Observer { isConnected ->
+//            homeViewModel.setInternetConnected(isConnected)
+//        })
+//
+//        homeViewModel.isInternetConnected.observe(this, Observer { isConnected ->
+//            if (isConnected) {
+//
+//                performAction()
+//
+//            }
+//
+//        })
+//
+//    }
 
-        binding.showHiddenButton.setOnCheckedChangeListener { buttonView, isChecked ->
+//    override fun onStop() {
+//        super.onStop()
+//        requireActivity().unregisterReceiver(networkChangeReceiver)
+//    }
 
-            if (isChecked) {
+    private fun performAction() {
 
-                homeViewModel.toDoList.value?.let { it1 -> adapter.toDoList = (it1.filter { !it.isDone }) }
+        lifecycleScope.launch {
+            homeViewModel.getSavedTasks().collect { items ->
 
-            }
-            else {
-
-                adapter.toDoList = (homeViewModel.toDoList.value!!)
+                homeViewModel.postSavedData(items)
 
             }
 
         }
+    }
+
+    override fun onRefresh() {
+
+        viewLifecycleOwner.lifecycleScope.launch {
+
+            homeViewModel.updateTasks()
+            homeViewModel.getSavedTasks().collect() {
+
+                if (!binding.showHiddenButton.isChecked)
+                {
+
+                    adapter.toDoList = it
+                    homeViewModel.setCounter(adapter.toDoList.filter { it.isComplete }.size)
+
+                }
+                else {
+
+                    adapter.toDoList = it.filter { !it.isComplete }
+
+                }
+
+            }
+        }
+
+        binding.swipe.isRefreshing = false
 
     }
+
+
+    private fun hiddenButtonInit() {
+
+        binding.showHiddenButton.setOnCheckedChangeListener { buttonView, isChecked ->
+
+            recyclerViewInit()
+
+        }
+
+    }
+
 
     fun floatButtonInit() {
 
@@ -126,13 +194,13 @@ class HomeFragment : Fragment() {
 
         adapter = ToDoAdapter(object : ToDoActionListener {
 
-            override fun onToDoItemDelete(todoItem: ToDoItem) {
+            override fun onToDoItemDelete(todoItem: ToDoItemEntity) {
 
-                homeViewModel.removeDataFromRepo(todoItem)
+                homeViewModel.deleteTask(todoItem.id, todoItem.isComplete)
 
             }
 
-            override fun onEditTask(todoItem: ToDoItem) {
+            override fun onEditTask(todoItem: ToDoItemEntity) {
 
                 val bundle = Bundle()
                 bundle.putInt("SAVE_OR_EDIT_FLAG", 1)
@@ -148,7 +216,7 @@ class HomeFragment : Fragment() {
 
             }
 
-            override fun onCheckTask(todoItem: ToDoItem, isChecked : Boolean) {
+            override fun onCheckTask(todoItem: ToDoItemEntity, isChecked : Boolean) {
 
                 if (isChecked) {
 
@@ -163,23 +231,24 @@ class HomeFragment : Fragment() {
 
                 }
 
-                homeViewModel.setCheckStatusToRepo(todoItem, isChecked)
+                todoItem.isComplete = isChecked
+                homeViewModel.updateTask(todoItem)
 
             }
 
-            override fun onLongClick(todoItem: ToDoItem) {
+            override fun onLongClick(todoItem: ToDoItemEntity) {
 
 
 
             }
 
-            override fun onToDoItemCopy(todoItem: ToDoItem) {
+            override fun onToDoItemCopy(todoItem: ToDoItemEntity) {
 
                 copyTextToClipboard(todoItem.text)
 
             }
 
-            override fun onToDoItemInfo(todoItem: ToDoItem) {
+            override fun onToDoItemInfo(todoItem: ToDoItemEntity) {
 
                 openInfoFragment(todoItem)
 
@@ -187,20 +256,72 @@ class HomeFragment : Fragment() {
 
         })
 
-        homeViewModel.toDoList.observe(viewLifecycleOwner, Observer {
+        viewLifecycleOwner.lifecycleScope.launch {
 
-            if (binding.showHiddenButton.isChecked) {
+            homeViewModel.getSavedTasks().collect {
 
-                adapter.toDoList = it.filter { !it.isDone }
+                if (binding.showHiddenButton.isChecked) {
+
+                    adapter.toDoList = it.filter { !it.isComplete } //РЕАЛИЗОВАТЬ ЧЕРЕЗ УТИЛ, СЛЫШИШЬ???????????????? НЕ ЗАБУДЬ!!!!!!!!!!!!!!!!!
+
+                }
+                else {
+
+                    adapter.toDoList = it
+                    homeViewModel.setCounter(adapter.toDoList.filter { it.isComplete }.size)
+
+                }
 
             }
-            else {
 
-                adapter.toDoList = it
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+
+            homeViewModel.toDoList.collect { response ->
+
+                when (response) {
+
+                    is Resource.Success -> {
+                        hideProgressBar()
+                        response.data?.let {
+
+                            if (binding.showHiddenButton.isChecked) {
+
+                                adapter.toDoList = it.filter { !it.isComplete } //РЕАЛИЗОВАТЬ ЧЕРЕЗ УТИЛ, СЛЫШИШЬ???????????????? НЕ ЗАБУДЬ!!!!!!!!!!!!!!!!!
+
+                            }
+                            else {
+
+                                adapter.toDoList = it
+                                homeViewModel.setCounter(adapter.toDoList.filter { it.isComplete }.size)
+
+                            }
+
+                        }
+                    }
+                    is Resource.Error -> {
+
+                        hideProgressBar()
+                        response.message?.let {message ->
+
+                            Log.e("HOME_FRAGMENT", "An error occurred: $message")
+
+                        }
+
+                    }
+                    is Resource.Loading -> {
+
+                        showProgressBar()
+
+                    }
+                }
 
             }
 
-        })
+
+        }
+
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -210,8 +331,20 @@ class HomeFragment : Fragment() {
 
     }
 
+    private fun hideProgressBar() {
 
-    fun copyTextToClipboard(text: String) {
+        binding.circularProgressBar.visibility = View.INVISIBLE
+
+    }
+
+    private fun showProgressBar() {
+
+        binding.circularProgressBar.visibility = View.VISIBLE
+
+    }
+
+
+    private fun copyTextToClipboard(text: String) {
 
         val clipboardManager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clipData = ClipData.newPlainText("label", text)
@@ -231,14 +364,6 @@ class HomeFragment : Fragment() {
                 target: RecyclerView.ViewHolder
             ): Boolean {
 
-                val from_pos = viewHolder.absoluteAdapterPosition
-                val to_pos = target.absoluteAdapterPosition
-
-                val firstObject = (itemRv!!.adapter as? ToDoAdapter)!!.toDoList[from_pos]
-                val secondObject = (itemRv!!.adapter as? ToDoAdapter)!!.toDoList[to_pos]
-
-                homeViewModel.swapElementsToRepository(firstObject, secondObject)
-
                 return false
 
             }
@@ -255,10 +380,10 @@ class HomeFragment : Fragment() {
 
                         ItemTouchHelper.LEFT-> {
 
-                            val removedElement : ToDoItem = (itemRv!!.adapter as?
+                            val removedElement : ToDoItemEntity = (itemRv!!.adapter as?
                                     ToDoAdapter)!!.toDoList[position]
 
-                            homeViewModel.removeDataFromRepo(removedElement)
+                            homeViewModel.deleteTask(removedElement.id, removedElement.isComplete)
 
                             val snackBar = Snackbar.make(
 
@@ -273,7 +398,7 @@ class HomeFragment : Fragment() {
                                 override fun onShown(transientBottomBar: Snackbar?) {
                                     transientBottomBar?.setAction("UNDO") {
 
-                                        homeViewModel.backToTheRepository(removedElement)
+                                        homeViewModel.addTask(removedElement)
 
                                         actionBtnTapped = true
 
@@ -300,7 +425,7 @@ class HomeFragment : Fragment() {
 
                         ItemTouchHelper.RIGHT-> {
 
-                            val informedFragment : ToDoItem = (itemRv!!.adapter as?
+                            val informedFragment : ToDoItemEntity = (itemRv!!.adapter as?
                                     ToDoAdapter)!!.toDoList[position]
 
                             openInfoFragment(informedFragment)
@@ -327,13 +452,10 @@ class HomeFragment : Fragment() {
     }
 
 
-    fun openInfoFragment(item: ToDoItem) {
+    fun openInfoFragment(item: ToDoItemEntity) {
 
         val bundle = Bundle()
-        bundle.putInt("SAVE_OR_EDIT_FLAG", 1)
-        Log.d("ID", item.id.toString())
-        Log.d("LIST", homeViewModel.toDoList.value.toString())
-        bundle.putString("TASK_ID_INFO", "${item.id}")
+        bundle.putParcelable("ITEM", item)
 
         val fragment = InfoFragment.newInstance(bundle)
 

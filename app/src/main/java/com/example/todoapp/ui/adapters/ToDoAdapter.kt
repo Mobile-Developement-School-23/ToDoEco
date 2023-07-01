@@ -7,40 +7,37 @@ import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.example.todoapp.data.ToDoItem
+import com.example.todoapp.db.ToDoItemEntity
 import com.example.todoapp.R
+import com.example.todoapp.api.request_response_data.ToDoItemResponse
 import com.example.todoapp.databinding.ToDoLayoutBinding
-import com.example.todoapp.ui.util.MyDiffUtil
-import com.example.todoapp.ui.util.factory
-import com.example.todoapp.ui.viewmodels.HomeViewModel
+import com.example.todoapp.util.MyDiffUtil
 import java.text.SimpleDateFormat
 import java.util.*
 
 interface ToDoActionListener {
 
 
-    fun onToDoItemDelete(todoItem: ToDoItem)
+    fun onToDoItemDelete(todoItem: ToDoItemEntity)
 
-    fun onEditTask(todoItem: ToDoItem)
+    fun onEditTask(todoItem: ToDoItemEntity)
 
-    fun onCheckTask(todoItem: ToDoItem, isChecked: Boolean)
+    fun onCheckTask(todoItem: ToDoItemEntity, isChecked: Boolean)
 
-    fun onLongClick(todoItem: ToDoItem)
+    fun onLongClick(todoItem: ToDoItemEntity)
 
-    fun onToDoItemCopy(todoItem: ToDoItem)
+    fun onToDoItemCopy(todoItem: ToDoItemEntity)
 
-    fun onToDoItemInfo(todoItem: ToDoItem)
+    fun onToDoItemInfo(todoItem: ToDoItemEntity)
 
 }
 
 class ToDoAdapter( private val actionListener: ToDoActionListener ) :
     RecyclerView.Adapter<ToDoAdapter.ToDoViewHolder>(), View.OnClickListener {
 
-    var toDoList: List<ToDoItem> = emptyList()
+    var toDoList: List<ToDoItemEntity> = emptyList()
 
         set(newValue) {
 
@@ -53,7 +50,7 @@ class ToDoAdapter( private val actionListener: ToDoActionListener ) :
 
     override fun onClick(v: View) {
 
-        val todoItem = v.tag as ToDoItem
+        val todoItem = v.tag as ToDoItemEntity
 
         when(v.id) {
 
@@ -71,7 +68,7 @@ class ToDoAdapter( private val actionListener: ToDoActionListener ) :
 
     override fun getItemCount(): Int = toDoList.size
 
-    fun getItem(position: Int) : ToDoItem = toDoList[position]
+    fun getItem(position: Int) : ToDoItemEntity = toDoList[position]
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ToDoViewHolder {
 
@@ -86,6 +83,8 @@ class ToDoAdapter( private val actionListener: ToDoActionListener ) :
 
     override fun onBindViewHolder(holder: ToDoViewHolder, position: Int) {
 
+        val format = SimpleDateFormat("yyyy-MM-dd")
+
         holder.binding.doOrNo.setOnCheckedChangeListener(null)
 
         val todoItem = toDoList[position]
@@ -96,7 +95,7 @@ class ToDoAdapter( private val actionListener: ToDoActionListener ) :
             holder.itemView.tag = todoItem
             hamburger.tag = todoItem
 
-            val isChecked = todoItem.isDone
+            val isChecked = todoItem.isComplete
 
             doOrNo.isChecked = isChecked
 
@@ -138,10 +137,17 @@ class ToDoAdapter( private val actionListener: ToDoActionListener ) :
 
             val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
-            if (todoItem.deadline != null) {
+            if (todoItem.dateDeadline != null) {
 
                 deadline.visibility = View.VISIBLE
-                deadline.text = dateFormat.format(todoItem.deadline)
+
+                val timestamp: Long = todoItem!!.dateDeadline!!
+
+                val date = Date(timestamp)
+
+                val dateString = format.format(date)
+
+                deadline.text = dateString
 
             } else {
 
@@ -151,9 +157,9 @@ class ToDoAdapter( private val actionListener: ToDoActionListener ) :
 
             val importanceIcon = when (todoItem.importance) {
 
-                ToDoItem.Importance.LOW -> R.drawable.slow
-                ToDoItem.Importance.NORMAL -> R.drawable.normally
-                ToDoItem.Importance.URGENT -> R.drawable.urgently
+                ToDoItemResponse.Importance.low -> R.drawable.slow
+                ToDoItemResponse.Importance.basic -> R.drawable.normally
+                ToDoItemResponse.Importance.important -> R.drawable.urgently
 
             }
 
@@ -170,7 +176,7 @@ class ToDoAdapter( private val actionListener: ToDoActionListener ) :
         val popupMenu = PopupMenu(view.context, view)
         val context = view.context
 
-        val todoItem = view.tag as ToDoItem
+        val todoItem = view.tag as ToDoItemEntity
 
         popupMenu.menu.add(0, ID_COPY, Menu.NONE, context.getString(R.string.copy))
 
