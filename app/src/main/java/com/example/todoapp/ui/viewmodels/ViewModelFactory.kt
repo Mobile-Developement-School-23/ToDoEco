@@ -2,7 +2,7 @@ package com.example.todoapp.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.todoapp.data.network.network_util.NetworkConnectivityObserver
+import com.example.todoapp.data.network.observers.NetworkConnectivityObserver
 import com.example.todoapp.domain.usecases.AddTaskUseCase
 import com.example.todoapp.domain.usecases.GetAllTasksUseCase
 import com.example.todoapp.domain.usecases.GetItemByIdUseCase

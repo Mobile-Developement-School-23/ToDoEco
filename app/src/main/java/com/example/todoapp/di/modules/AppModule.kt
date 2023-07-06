@@ -1,8 +1,7 @@
 package com.example.todoapp.di.modules
 
 import android.content.Context
-import com.example.todoapp.data.network.network_util.NetworkConnectivityObserver
-import com.example.todoapp.data.util.SharedPreferenceHelper
+import com.example.todoapp.data.network.observers.NetworkConnectivityObserver
 import com.example.todoapp.domain.usecases.AddTaskUseCase
 import com.example.todoapp.domain.usecases.GetAllTasksUseCase
 import com.example.todoapp.domain.usecases.GetItemByIdUseCase

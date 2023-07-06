@@ -17,7 +17,7 @@ import androidx.work.WorkManager
 import com.airbnb.lottie.LottieAnimationView
 import com.example.todoapp.R
 import com.example.todoapp.databinding.ActivityMainBinding
-import com.example.todoapp.workers.ServerUpdateWorker
+import com.example.todoapp.data.network.workers.ServerUpdateWorker
 
 class MainActivity : AppCompatActivity() {
 

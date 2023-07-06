@@ -1,4 +1,4 @@
-package com.example.todoapp.workers
+package com.example.todoapp.data.network.workers
 
 import android.content.Context
 import androidx.work.CoroutineWorker

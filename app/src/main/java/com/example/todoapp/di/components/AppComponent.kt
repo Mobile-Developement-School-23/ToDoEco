@@ -8,7 +8,7 @@ import com.example.todoapp.di.modules.NetworkModule
 import com.example.todoapp.ui.fragments.EditAddFragment
 import com.example.todoapp.ui.fragments.HomeFragment
 import com.example.todoapp.ui.fragments.InfoFragment
-import com.example.todoapp.workers.ServerUpdateWorker
+import com.example.todoapp.data.network.workers.ServerUpdateWorker
 import dagger.Component
 import javax.inject.Singleton
 

@@ -1,10 +1,9 @@
 package com.example.todoapp.ui.viewmodels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.todoapp.data.network.network_util.ConnectivityObserver
-import com.example.todoapp.data.network.network_util.NetworkConnectivityObserver
+import com.example.todoapp.data.network.observers.ConnectivityObserver
+import com.example.todoapp.data.network.observers.NetworkConnectivityObserver
 import com.example.todoapp.domain.DataState
 import com.example.todoapp.domain.Importance
 import com.example.todoapp.domain.TaskModel

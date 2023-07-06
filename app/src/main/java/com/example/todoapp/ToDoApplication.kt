@@ -7,7 +7,7 @@ import androidx.work.WorkManager
 import com.example.todoapp.di.components.AppComponent
 import com.example.todoapp.di.components.DaggerAppComponent
 import com.example.todoapp.di.modules.AppModule
-import com.example.todoapp.workers.ServerUpdateWorker
+import com.example.todoapp.data.network.workers.ServerUpdateWorker
 import java.util.concurrent.TimeUnit
 
 

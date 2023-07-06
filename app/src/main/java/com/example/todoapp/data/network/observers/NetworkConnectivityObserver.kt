@@ -1,4 +1,4 @@
-package com.example.todoapp.data.network.network_util
+package com.example.todoapp.data.network.observers
 
 import android.content.Context
 import android.net.ConnectivityManager
