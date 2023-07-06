@@ -1,5 +1,6 @@
 package com.example.todoapp.ui.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todoapp.data.network.network_util.ConnectivityObserver
@@ -10,6 +11,7 @@ import com.example.todoapp.domain.TaskModel
 import com.example.todoapp.domain.usecases.AddTaskUseCase
 import com.example.todoapp.domain.usecases.GetAllTasksUseCase
 import com.example.todoapp.domain.usecases.GetItemByIdUseCase
+import com.example.todoapp.domain.usecases.MergeTasksUseCase
 import com.example.todoapp.domain.usecases.RemoveTaskUseCase
 import com.example.todoapp.domain.usecases.UpdateTaskUseCase
 import com.example.todoapp.ui.UiState
@@ -31,6 +33,7 @@ class HomeViewModel(
     private val getSingleCase: GetItemByIdUseCase,
     private val removeCase: RemoveTaskUseCase,
     private val addCase: AddTaskUseCase,
+    private val mergeCase: MergeTasksUseCase,
     private val connectivityObserver: NetworkConnectivityObserver
 ) : ViewModel()  {
 
@@ -83,6 +86,15 @@ class HomeViewModel(
         }
     }
 
+    fun merge(): Flow<UiState<String>> = flow {
+        mergeCase().collect { state ->
+            when (state) {
+                is DataState.Result -> emit(UiState.Success("Synchronized!"))
+                is DataState.Exception -> emit(UiState.Error(state.cause.message ?: "WTF"))
+                else -> emit(UiState.Start)
+            }
+        }
+    }
     fun addTask(text: String, priority: Importance, deadline: Long?): Flow<UiState<String>> = flow {
         emit(UiState.Start)
         addCase(text, priority, deadline)

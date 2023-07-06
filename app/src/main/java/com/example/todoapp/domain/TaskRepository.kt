@@ -1,5 +1,6 @@
 package com.example.todoapp.domain
 
+import android.util.Log
 import com.example.todoapp.data.db.DatabaseRepository
 import com.example.todoapp.data.db.RoomState
 import com.example.todoapp.data.network.NetworkRepository
@@ -10,6 +11,7 @@ import com.example.todoapp.domain.exceptions.ValidationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import java.lang.Exception
 import java.util.UUID
 
 class TaskRepository(
@@ -19,34 +21,58 @@ class TaskRepository(
 ) {
 
     fun getAllTasks(): Flow<DataState<List<TaskModel>>> = flow {
-        emit(DataState.Initial)
-        databaseSource.getTasks().collect { roomState ->
-            when (roomState) {
-                is RoomState.Success -> emit(DataState.Result(roomState.data)).also {
-                    synchronizeTasks(roomState.revision, roomState.data)
-                }
-                is RoomState.Failure -> emit(DataState.Exception(roomState.err))
-                else -> {}
+        databaseSource.getTasks().collect {
+            when (it) {
+                is RoomState.Initial -> DataState.Initial
+                is RoomState.Success -> emit(DataState.Result(it.data))
+                is RoomState.Failure -> emit(DataState.Exception(it.err))
             }
         }
     }
 
-    private suspend fun synchronizeTasks(androidRevision: Int, tasks: List<TaskModel>) {
-        networkSource.getTasks().collect { networkState ->
-            when (networkState) {
+    suspend fun mergeTasks() {
+        Log.d("ОШЩЩШ", "jxl")
+        networkSource.getTasks().collect { listNetworkState ->
+            when (listNetworkState) {
+                is NetworkState.Loading -> {}
+                is NetworkState.Failure -> {
+                    Log.d("ОШЩЩШ", listNetworkState.cause.message.toString())
+                }
                 is NetworkState.Success -> {
-                    when {
-                        ((tasks != networkState.data) || (androidRevision != networkState.revision)) -> networkSource.patchTasks(tasks)
-                            .collect {
-                                when (it) {
-                                    is NetworkState.Success -> preferenceHelper.setIntValue(it.revision)
-                                    else -> {}
-                                }
+                    Log.d("САКСЭЭЭС", "лдтл")
+                    val oldRevision: Int = preferenceHelper.getIntValue()
+                    val oldDataList: List<TaskModel> = databaseSource.getTasksAsList()
+                    val isActual: Boolean = oldRevision >= listNetworkState.revision
+                    Log.d("ОШЩЩШ", isActual.toString())
+                    val data: List<TaskModel> = listOf(
+                        oldDataList.map { Pair(true, it) },
+                        listNetworkState.data.map { Pair(false, it) }
+                    ).flatten().groupBy { it.second.id }.map {
+                        when (it.value.size) {
+                            1 -> when (it.value.first().first == isActual) {
+                                true -> it.value.first().second
+                                else -> null
                             }
-                        else -> {}
+
+                            else -> it.value.maxByOrNull { pair ->
+                                maxOf(
+                                    pair.second.creationTime,
+                                    pair.second.modifyingTime!!
+                                )
+                            }?.second
+                        }
+                    }.filterNotNull()
+                    networkSource.patchTasks(data).collect { state ->
+                        when (state) {
+                            is NetworkState.Loading -> {}
+                            is NetworkState.Failure -> throw Exception("Failure!")
+                            is NetworkState.Success -> {
+                                databaseSource.overwriteDatabase(state.data)
+                                preferenceHelper.setIntValue(state.revision)
+                            }
+                        }
                     }
                 }
-                else -> {}
             }
         }
     }

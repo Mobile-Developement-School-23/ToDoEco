@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +37,7 @@ import com.example.todoapp.ui.recycler.SwipeGesture
 import com.example.todoapp.ui.util.snackbar
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -90,31 +92,44 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         when (status) {
             ConnectivityObserver.Status.Available -> {
                 if (internetState != status) {
-                    Toast.makeText(context, "Internet connection is available!", Toast.LENGTH_SHORT)
-                        .show()
-                    // загрузка задач с сервера у ВьюМодели
+                    requireView().snackbar("Internet connection is available!")
+                    lifecycle.coroutineScope.launch(Dispatchers.IO) {
+                        model.merge().collect {
+                            when (it) {
+                                is UiState.Start -> requireView().snackbar("Loading...")
+                                is UiState.Success -> requireView().snackbar("UP-TO-DATE!")
+                                is UiState.Error -> requireView().snackbar("Refreshing error, try again!")
+                            }
+                        }
+                    }
                 }
 
             }
 
             ConnectivityObserver.Status.Unavailable -> {
                 if (internetState != status) {
-                    Toast.makeText(context, "Not internet connection!", Toast.LENGTH_SHORT)
-                        .show()
-                    // ??
+                    requireView().snackbar("Not internet connection!")
+                    lifecycle.coroutineScope.launch(Dispatchers.IO) {
+                        model.merge().collect {
+                            when (it) {
+                                is UiState.Start -> requireView().snackbar("Loading...")
+                                is UiState.Success -> requireView().snackbar("UP-TO-DATE!")
+                                is UiState.Error -> requireView().snackbar("Refreshing error, try again!")
+                            }
+                        }
+                    }
                 }
             }
 
             ConnectivityObserver.Status.Losing -> {
                 if (internetState != status) {
-                    Toast.makeText(context, "Loss of Internet connection...", Toast.LENGTH_SHORT)
-                        .show()
+                    requireView().snackbar("Loss of Internet connection...")
                 }
             }
 
             ConnectivityObserver.Status.Lost -> {
                 if (internetState != status) {
-                    Toast.makeText(context, "The Internet connection is lost.", Toast.LENGTH_SHORT).show()
+                    requireView().snackbar("The Internet connection is lost.")
                 }
             }
         }
@@ -125,6 +140,15 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         binding.doneText.text = "Done: $doneCounter"
     }
     override fun onRefresh() {
+        lifecycle.coroutineScope.launch(Dispatchers.IO) {
+            model.merge().collect {
+                when (it) {
+                    is UiState.Start -> requireView().snackbar("Loading...")
+                    is UiState.Success -> requireView().snackbar("UP-TO-DATE!")
+                    is UiState.Error -> requireView().snackbar("Refreshing error, try again!")
+                }
+            }
+        }
         binding.swipe.isRefreshing = false
     }
     private fun hiddenButtonInit() {

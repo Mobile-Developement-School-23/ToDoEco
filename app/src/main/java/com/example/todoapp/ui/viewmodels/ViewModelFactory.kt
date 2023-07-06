@@ -6,6 +6,7 @@ import com.example.todoapp.data.network.network_util.NetworkConnectivityObserver
 import com.example.todoapp.domain.usecases.AddTaskUseCase
 import com.example.todoapp.domain.usecases.GetAllTasksUseCase
 import com.example.todoapp.domain.usecases.GetItemByIdUseCase
+import com.example.todoapp.domain.usecases.MergeTasksUseCase
 import com.example.todoapp.domain.usecases.RemoveTaskUseCase
 import com.example.todoapp.domain.usecases.UpdateTaskUseCase
 
@@ -15,6 +16,7 @@ class ViewModelFactory(
     private val getSingleCase: GetItemByIdUseCase,
     private val removeCase: RemoveTaskUseCase,
     private val addCase: AddTaskUseCase,
+    private val mergeCase: MergeTasksUseCase,
     private val connectivityObserver: NetworkConnectivityObserver
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -26,6 +28,7 @@ class ViewModelFactory(
                     getSingleCase = getSingleCase,
                     removeCase = removeCase,
                     addCase = addCase,
+                    mergeCase = mergeCase,
                     connectivityObserver = connectivityObserver
                 ) as T
             }
