@@ -1,6 +1,7 @@
 package com.example.todoapp.di.modules
 
 import android.content.Context
+import com.example.todoapp.data.network.network_util.NetworkConnectivityObserver
 import com.example.todoapp.data.util.SharedPreferenceHelper
 import com.example.todoapp.domain.usecases.AddTaskUseCase
 import com.example.todoapp.domain.usecases.GetAllTasksUseCase
@@ -27,16 +28,23 @@ class AppModule(
         getAllCase: GetAllTasksUseCase,
         getSingleCase: GetItemByIdUseCase,
         removeCase: RemoveTaskUseCase,
-        addCase: AddTaskUseCase
+        addCase: AddTaskUseCase,
+        connectivityObserver: NetworkConnectivityObserver
     ): ViewModelFactory = ViewModelFactory(
         updateCase = editCase,
         getAllCase = getAllCase,
         getSingleCase = getSingleCase,
         removeCase = removeCase,
-        addCase = addCase
+        addCase = addCase,
+        connectivityObserver = connectivityObserver
     )
 
     @Provides
     @Singleton
     fun provideSharedPreferences(context: Context) = SharedPreferenceHelper(context)
+
+    @Provides
+    @Singleton
+    fun provideConnectivityObserver(context: Context) = NetworkConnectivityObserver(context)
+
 }

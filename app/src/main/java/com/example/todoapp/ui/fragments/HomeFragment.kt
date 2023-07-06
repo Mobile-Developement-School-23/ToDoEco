@@ -4,11 +4,11 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.todoapp.R
 import com.example.todoapp.ToDoApplication
+import com.example.todoapp.data.network.network_util.ConnectivityObserver
 import com.example.todoapp.databinding.FragmentHomeBinding
 import com.example.todoapp.domain.TaskModel
 import com.example.todoapp.ui.UiState
@@ -39,8 +40,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.UUID
 import javax.inject.Inject
 
 
@@ -59,6 +58,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var adapter: ToDoAdapter
     private lateinit var recyclerView: RecyclerView
     private lateinit var navController: NavController
+    private var internetState = ConnectivityObserver.Status.Unavailable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,12 +74,53 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 updateUI(count)
             }
         }
+        lifecycleScope.launch {
+            model.status.collectLatest {
+                updateState(it)
+            }
+        }
         binding.swipe.setOnRefreshListener(this)
         recyclerViewInit()
         floatButtonInit()
         hiddenButtonInit()
         return root
     }
+
+    private fun updateState(status: ConnectivityObserver.Status) {
+        when (status) {
+            ConnectivityObserver.Status.Available -> {
+                if (internetState != status) {
+                    Toast.makeText(context, "Internet connection is available!", Toast.LENGTH_SHORT)
+                        .show()
+                    // загрузка задач с сервера у ВьюМодели
+                }
+
+            }
+
+            ConnectivityObserver.Status.Unavailable -> {
+                if (internetState != status) {
+                    Toast.makeText(context, "Not internet connection!", Toast.LENGTH_SHORT)
+                        .show()
+                    // ??
+                }
+            }
+
+            ConnectivityObserver.Status.Losing -> {
+                if (internetState != status) {
+                    Toast.makeText(context, "Loss of Internet connection...", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+
+            ConnectivityObserver.Status.Lost -> {
+                if (internetState != status) {
+                    Toast.makeText(context, "The Internet connection is lost.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        internetState = status
+    }
+
     private fun updateUI(doneCounter: Int) {
         binding.doneText.text = "Done: $doneCounter"
     }
@@ -122,7 +163,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 }
             }
             override fun onEditTask(todoItem: TaskModel) {
-                Log.d("О ПРИВЕТ", todoItem.text)
                 val bundle = Bundle()
                 bundle.putInt("SAVE_OR_EDIT_FLAG", 1)
                 bundle.putString("TASK_ID", "${todoItem.id}")

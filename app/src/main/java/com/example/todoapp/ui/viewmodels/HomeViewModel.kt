@@ -2,6 +2,8 @@ package com.example.todoapp.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.todoapp.data.network.network_util.ConnectivityObserver
+import com.example.todoapp.data.network.network_util.NetworkConnectivityObserver
 import com.example.todoapp.domain.DataState
 import com.example.todoapp.domain.Importance
 import com.example.todoapp.domain.TaskModel
@@ -16,7 +18,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -26,11 +30,15 @@ class HomeViewModel(
     private val getAllCase: GetAllTasksUseCase,
     private val getSingleCase: GetItemByIdUseCase,
     private val removeCase: RemoveTaskUseCase,
-    private val addCase: AddTaskUseCase
+    private val addCase: AddTaskUseCase,
+    private val connectivityObserver: NetworkConnectivityObserver
 ) : ViewModel()  {
 
     private var job: Job? = null
     private val _tasks: Flow<DataState<List<TaskModel>>> = getAllCase()
+
+    private val _status = MutableStateFlow(ConnectivityObserver.Status.Unavailable)
+    val status = _status.asStateFlow()
 
     private val _visibility: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val visibility: StateFlow<Boolean> get() = _visibility
@@ -45,6 +53,7 @@ class HomeViewModel(
     val doneCounter: StateFlow<Int> get() = _doneCounter
 
     init {
+        startObserveNetwork()
         job = viewModelScope.launch(Dispatchers.IO) {
             _tasks.collect { state ->
                 when (state) {
@@ -62,6 +71,14 @@ class HomeViewModel(
                         _undoneTasks.emit(UiState.Start)
                     }
                 }
+            }
+        }
+    }
+
+    private fun startObserveNetwork() {
+        viewModelScope.launch {
+            connectivityObserver.observe().collectLatest {
+                _status.emit(it)
             }
         }
     }
