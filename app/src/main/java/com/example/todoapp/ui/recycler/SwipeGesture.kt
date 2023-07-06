@@ -1,4 +1,4 @@
-package com.example.todoapp.util
+package com.example.todoapp.ui.recycler
 
 import android.content.Context
 import android.graphics.Canvas

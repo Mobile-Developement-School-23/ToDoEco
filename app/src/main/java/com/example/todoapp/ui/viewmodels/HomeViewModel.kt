@@ -1,434 +1,119 @@
 package com.example.todoapp.ui.viewmodels
 
-import android.app.Application
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.net.NetworkCapabilities.TRANSPORT_CELLULAR
-import android.net.NetworkCapabilities.TRANSPORT_ETHERNET
-import android.net.NetworkCapabilities.TRANSPORT_WIFI
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.todoapp.ToDoApplication
-import com.example.todoapp.api.RetrofitInstance
-import com.example.todoapp.db.ToDoItemEntity
-import com.example.todoapp.api.request_response_data.TaskListResponse
-import com.example.todoapp.data.ToDoItem
-import com.example.todoapp.data.ToDoRepository
-import com.example.todoapp.util.Resource
+import com.example.todoapp.domain.DataState
+import com.example.todoapp.domain.Importance
+import com.example.todoapp.domain.TaskModel
+import com.example.todoapp.domain.usecases.AddTaskUseCase
+import com.example.todoapp.domain.usecases.GetAllTasksUseCase
+import com.example.todoapp.domain.usecases.GetItemByIdUseCase
+import com.example.todoapp.domain.usecases.RemoveTaskUseCase
+import com.example.todoapp.domain.usecases.UpdateTaskUseCase
+import com.example.todoapp.ui.UiState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import retrofit2.HttpException
-import retrofit2.Response
-import java.io.IOException
 import java.util.UUID
 
 class HomeViewModel(
+    private val updateCase: UpdateTaskUseCase,
+    private val getAllCase: GetAllTasksUseCase,
+    private val getSingleCase: GetItemByIdUseCase,
+    private val removeCase: RemoveTaskUseCase,
+    private val addCase: AddTaskUseCase
+) : ViewModel()  {
 
-    app: Application,
-    private val toDoRepo: ToDoRepository
+    private var job: Job? = null
+    private val _tasks: Flow<DataState<List<TaskModel>>> = getAllCase()
 
-) : AndroidViewModel(app) {
+    private val _visibility: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    val visibility: StateFlow<Boolean> get() = _visibility
 
-    private val _todoList: MutableStateFlow<Resource<List<ToDoItemEntity>>> = MutableStateFlow(Resource.Loading())
-    val toDoList: StateFlow<Resource<List<ToDoItemEntity>>> = _todoList
+    private val _allTasks: MutableStateFlow<UiState<List<TaskModel>>> = MutableStateFlow(UiState.Start)
+    val allTasks: StateFlow<UiState<List<TaskModel>>> get() = _allTasks
 
-    private val _counterToDo: MutableStateFlow<Int> = MutableStateFlow(0)
-    val counterToDo: StateFlow<Int> = _counterToDo
-//
-//    private val _isInternetConnected = MutableLiveData<Boolean>()
-//    val isInternetConnected: LiveData<Boolean>
-//        get() = _isInternetConnected
+    private val _undoneTasks: MutableStateFlow<UiState<List<TaskModel>>> = MutableStateFlow(UiState.Start)
+    val undoneTasks: StateFlow<UiState<List<TaskModel>>> get() = _undoneTasks
 
+    private val _doneCounter: MutableStateFlow<Int> = MutableStateFlow(0)
+    val doneCounter: StateFlow<Int> get() = _doneCounter
 
     init {
-
-//        _isInternetConnected.value = false
-        getToDo()
-
-    }
-
-//    fun setInternetConnected(connected: Boolean) {
-//
-//        _isInternetConnected.postValue(connected)
-//
-//    }
-
-    fun setCounter(count : Int) {
-
-        _counterToDo.value = count
-
-    }
-
-    private fun getToDo() = viewModelScope.launch(Dispatchers.IO) {
-
-        _todoList.emit(Resource.Loading())
-
-        try {
-
-            if ( hasInternetConnection() ) {
-
-                toDoRepo.getToDoItems()
-
-                    .onStart { _todoList.emit( Resource.Loading() ) }
-                    .catch { e -> _todoList.emit( Resource.Error("An error occurred: ${e.localizedMessage ?: "Unknown error"}") ) }
-                    .collect { result ->
-                        _todoList.emit(Resource.Success(result.data!!))
+        job = viewModelScope.launch(Dispatchers.IO) {
+            _tasks.collect { state ->
+                when (state) {
+                    is DataState.Result -> {
+                        _allTasks.emit(UiState.Success(state.data))
+                        _undoneTasks.emit(UiState.Success(state.data.filter { !it.isDone }))
+                        _doneCounter.value = state.data.count { it.isDone }
                     }
-
-            } else {
-
-                _todoList.emit( Resource.Error("No Internet Connection") )
-
-            }
-
-        } catch (t: Throwable) {
-
-            when (t) {
-
-                is IOException -> _todoList.emit( Resource.Error("Network Failure") )
-                is HttpException -> _todoList.emit( Resource.Error("Request failed with ${t.code()}: ${t.message()}") )
-                else -> _todoList.emit( Resource.Error("Conversion Error") )
-
-            }
-
-        }
-
-    }
-
-    fun hasInternetConnection(): Boolean {
-
-        val connectivityManager = getApplication<ToDoApplication>().getSystemService(
-
-            Context.CONNECTIVITY_SERVICE
-
-        ) as ConnectivityManager
-
-        val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-
-        return when {
-
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            else -> false
-        }
-
-    }
-
-    fun deleteTask(id: String, isCheck : Boolean) = viewModelScope.launch(Dispatchers.IO) {
-
-        try {
-
-            if (hasInternetConnection()) {
-
-                val response = toDoRepo.deleteFromInternet(id)
-
-                if (response is Resource.Success) {
-
-                    if (isCheck)
-                        decrementCounterToDo()
-                    deleteTaskFromLocalDb(id)
-
-                } else if (response is Resource.Error) {
-
-                    handleDeleteTaskError(response.message)
-
+                    is DataState.Exception -> {
+                        _allTasks.emit(UiState.Error(state.cause.message ?: ""))
+                        _undoneTasks.emit(UiState.Error(state.cause.message ?: ""))
+                    }
+                    else -> {
+                        _allTasks.emit(UiState.Start)
+                        _undoneTasks.emit(UiState.Start)
+                    }
                 }
-
-            } else {
-
-                if (isCheck)
-                    decrementCounterToDo()
-
-                deleteTaskFromLocalDb(id)
-                handleNoInternetConnectionError()
-
             }
-
-        } catch (e: Exception) {
-
-            handleExceptionError(e.localizedMessage ?: "Unknown error")
-
         }
-
     }
 
-    fun updateTasks() {
-
-        getToDo()
-
+    fun addTask(text: String, priority: Importance, deadline: Long?): Flow<UiState<String>> = flow {
+        emit(UiState.Start)
+        addCase(text, priority, deadline)
+        emit(UiState.Success("Task added!"))
+    }.catch {
+        emit(UiState.Error(it.message ?: "Unrecognized exception!"))
     }
 
-    fun addTask(item: ToDoItemEntity) = viewModelScope.launch(Dispatchers.IO) {
+    suspend fun setTask(task: TaskModel): Flow<UiState<String>> = flow {
+        emit(UiState.Start)
+        updateCase(task)
+        emit(UiState.Success("Task modified!"))
+    }.catch {
+        emit(UiState.Error(it.stackTraceToString()))
+    }
 
-        try {
+    suspend fun removeTask(task: TaskModel): Flow<UiState<String>> = flow {
+        emit(UiState.Start)
+        removeCase(task)
+        emit(UiState.Success("Task deleted!"))
+    }.catch {
+        emit(UiState.Error(it.stackTraceToString()))
+    }
 
-            if (hasInternetConnection()) {
-
-                val response = toDoRepo.addToInternet(item)
-
-                if (response is Resource.Success) {
-
-                    addTaskToLocalDb(item)
-
-                } else if (response is Resource.Error) {
-
-                    handleAddTaskError(response.message)
-
-                }
-
-            } else {
-
-                handleNoInternetConnectionError()
-
+    fun requireTask(id: UUID): Flow<UiState<TaskModel>> = flow {
+        getSingleCase(id).collect { dataState ->
+            when (dataState) {
+                is DataState.Result -> emit(UiState.Success(dataState.data))
+                is DataState.Exception -> emit(UiState.Error(dataState.cause.message ?: ""))
+                else -> emit(UiState.Start)
             }
-
-        } catch (e: Exception) {
-
-            handleExceptionError(e.localizedMessage ?: "Unknown error")
-
-        }
-
-    }
-
-    fun updateTask(item: ToDoItemEntity) = viewModelScope.launch(Dispatchers.IO) {
-
-        try {
-
-            if (hasInternetConnection()) {
-
-                val response = toDoRepo.changeOnInternet(item.id, item)
-
-                if (response is Resource.Success) {
-
-                    updateTaskFromLocalDb(item)
-
-                } else if (response is Resource.Error) {
-
-                    handleUpdateTaskError(response.message)
-
-                }
-
-            } else {
-
-                updateTaskFromLocalDb(item)
-                handleNoInternetConnectionError()
-
-            }
-        } catch (e: Exception) {
-            handleExceptionError(e.localizedMessage ?: "Unknown error")
         }
     }
 
-    fun postSavedData(list : List<ToDoItemEntity>) = viewModelScope.launch(Dispatchers.IO) {
-
-        try {
-
-            if (hasInternetConnection()) {
-
-                val response = toDoRepo.addNewListToInternet(list)
-
-                if (response is Resource.Success) {
-
-
-
-                } else if (response is Resource.Error) {
-
-                    handleUpdateTaskError(response.message)
-
-                }
-
-            } else {
-
-                handleNoInternetConnectionError()
-
-            }
-        } catch (e: Exception) {
-            handleExceptionError(e.localizedMessage ?: "Unknown error")
-        }
-
+    fun invertVisibilityState() {
+        _visibility.value = !_visibility.value
     }
 
-    // Обработчики
-
-    private fun handleDeleteTaskError(errorMessage: String?) {
-
-
-
+    override fun onCleared() {
+        job?.cancel()
     }
 
-    private fun handleAddTaskError(errorMessage: String?) {
-
-
-
+    fun incrementDoneCounter() {
+        _doneCounter.value += 1
     }
 
-    private fun handleUpdateTaskError(errorMessage: String?) {
-
-
-
-    }
-
-    private fun handleNoInternetConnectionError() {
-
-
-
-    }
-
-    private fun handleExceptionError(errorMessage: String) {
-
-
-
-    }
-
-    // Работа с базой данных
-
-    fun saveTasksToLocalDb(list: List<ToDoItemEntity>) = viewModelScope.launch(Dispatchers.IO) {
-
-        toDoRepo.saveDataToLocalDb(list)
-
-    }
-
-    fun getSavedTasks(): Flow<List<ToDoItemEntity>> {
-
-        return toDoRepo.getSavedToDo()
-
-    }
-
-    fun deleteTaskFromLocalDb(id: String) = viewModelScope.launch(Dispatchers.IO) {
-
-        toDoRepo.deleteFromLocalDb(id)
-
-    }
-
-    fun addTaskToLocalDb(item: ToDoItemEntity) = viewModelScope.launch(Dispatchers.IO) {
-
-        toDoRepo.addToLocalDb(item)
-
-    }
-
-    fun updateTaskFromLocalDb(item: ToDoItemEntity) = viewModelScope.launch(Dispatchers.IO) {
-
-        toDoRepo.updateLocalDbItem(item)
-
-    }
-
-    fun getTaskById(id: String) : ToDoItemEntity? {
-
-        var item : ToDoItemEntity? = null
-
-        viewModelScope.launch(Dispatchers.IO) {
-
-            item = toDoRepo.getItemById(id)
-
-        }
-
-        return item
-
-    }
-
-    // Подсчет сделанных дел
-
-    fun incrementCounterToDo() {
-
-        _counterToDo.value += 1
-
-    }
-
-    fun decrementCounterToDo() {
-
-        _counterToDo.value -= 1
-
+    fun decrementDoneCounter() {
+        _doneCounter.value -= 1
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//    private val listener: ToDoListener = { // коррект
-//
-//        _todoList.value = it
-//
-//    }
-//
-//    init {
-//
-//        loadTasks()  // коррект
-//
-//        _counterToDo.value = toDoList.value?.count { it.done }!!
-//
-//    }
-//
-//    override fun onCleared() {  // коррект
-//
-//        super.onCleared()  // коррект
-//        toDoRepo.removeListener(listener)  // коррект
-//
-//    }
-//
-//    fun loadTasks() { // можно видеть список позиций
-//
-//        toDoRepo.addListener(listener)
-//
-//    }
-//
-//
-
-//
-//
-//    fun removeDataFromRepo(item: ToDoItem) { //удаление через Попап и свайпы
-//
-//        if (item.done)
-//            _counterToDo.value = _counterToDo.value!! - 1
-//
-//        toDoRepo.removeItem(item)
-//
-//    }
-//
-//
-//    fun setCheckStatusToRepo(item: ToDoItem, isChecked : Boolean) { // поставить сделанное дело
-//
-//        toDoRepo.setCheckStatus(item, isChecked)
-//
-//    }
-//
-//    fun getItemById(id : String) = toDoRepo.getToDoItemById(id)
-//
-//    fun swapElementsToRepository(item1: ToDoItem, item2: ToDoItem) {
-//
-//        toDoRepo.swapElements(item1, item2)
-//
-//    }
-//
-//    fun backToTheRepository(item: ToDoItem) {
-//
-//        toDoRepo.itemBack(item)
-//
-//    }

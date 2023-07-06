@@ -7,12 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.viewModels
-import com.example.todoapp.api.request_response_data.ToDoItemResponse
-import com.example.todoapp.db.ToDoItemEntity
 import com.example.todoapp.databinding.InfoFragmentDialogBinding
-import com.example.todoapp.util.factory
-import java.io.Serializable
+import com.example.todoapp.domain.Importance
+import com.example.todoapp.domain.TaskModel
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -21,7 +18,7 @@ class InfoFragment : DialogFragment() {
     private var _binding: InfoFragmentDialogBinding? = null
     private val binding get() = _binding!!
 
-    private var toDoItemEntity : ToDoItemEntity? = null
+    private var toDoItemEntity : TaskModel? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val args: Bundle? = arguments
@@ -67,17 +64,17 @@ class InfoFragment : DialogFragment() {
 
         val format = SimpleDateFormat("yyyy-MM-dd")
 
-        when (toDoItemEntity!!.importance) {
-            ToDoItemResponse.Importance.low -> binding.importanceInfo.text = "Low"
-            ToDoItemResponse.Importance.basic -> binding.importanceInfo.text = "Normal"
-            ToDoItemResponse.Importance.important -> binding.importanceInfo.text = "Urgent"
+        when (toDoItemEntity!!.priority) {
+            Importance.LOW -> binding.importanceInfo.text = "Low"
+            Importance.BASIC -> binding.importanceInfo.text = "Normal"
+            Importance.IMPORTANT -> binding.importanceInfo.text = "Urgent"
         }
 
-        when (toDoItemEntity!!.dateDeadline) {
+        when (toDoItemEntity!!.deadline) {
             null -> binding.deadlineInfo.text = "-"
             else -> {
 
-                val timestamp: Long = toDoItemEntity!!.dateDeadline!!
+                val timestamp: Long = toDoItemEntity!!.deadline!!
 
                 val date = Date(timestamp)
 
@@ -87,12 +84,12 @@ class InfoFragment : DialogFragment() {
             }
         }
 
-        when (toDoItemEntity!!.isComplete) {
+        when (toDoItemEntity!!.isDone) {
             true -> binding.doneInfo.text = "Yes"
             false -> binding.doneInfo.text = "No"
         }
 
-        val timestampCreation: Long = toDoItemEntity!!.dateCreation!!
+        val timestampCreation: Long = toDoItemEntity!!.creationTime!!
 
         val dateCreation = Date(timestampCreation)
 
@@ -101,11 +98,11 @@ class InfoFragment : DialogFragment() {
         binding.creationInfo.text = dateCreationString
 
 
-        when (toDoItemEntity!!.dateChanging) {
+        when (toDoItemEntity!!.modifyingTime) {
             null -> binding.modificationInfo.text = "-"
             else -> {
 
-                val timestampChanging: Long = toDoItemEntity!!.dateChanging!!
+                val timestampChanging: Long = toDoItemEntity!!.modifyingTime!!
 
                 val dateChanging = Date(timestampChanging
                 )

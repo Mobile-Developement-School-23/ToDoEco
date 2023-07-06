@@ -1,46 +1,22 @@
 package com.example.todoapp
 
+import android.annotation.SuppressLint
 import android.app.Application
-import com.example.todoapp.data.ToDoRepository
-import com.example.todoapp.db.ToDoDatabase
+import com.example.todoapp.di.components.AppComponent
+import com.example.todoapp.di.components.DaggerAppComponent
+import com.example.todoapp.di.modules.AppModule
 
-
-// , Configuration.Provider
 
 class ToDoApplication : Application() {
 
-    lateinit var toDoRepository: ToDoRepository
-
+    lateinit var appComponent: AppComponent
+    @SuppressLint("SimpleDateFormat", "HardwareIds")
     override fun onCreate() {
+
         super.onCreate()
-        toDoRepository = ToDoRepository(ToDoDatabase(context = applicationContext), applicationContext)
-//        schedulePeriodicWork()
+
+        appComponent = DaggerAppComponent.builder().appModule(AppModule(this)).build()
+
     }
 
-//    private fun schedulePeriodicWork() {
-//        val constraints = Constraints.Builder()
-//            .setRequiredNetworkType(NetworkType.CONNECTED)
-//            .build()
-//
-//        val repeatingRequest = PeriodicWorkRequestBuilder<ServerUpdateWorker>(
-//            repeatInterval = 8,
-//            repeatIntervalTimeUnit = TimeUnit.HOURS
-//        )
-//            .setConstraints(constraints)
-//            .build()
-//
-//        val workManager = WorkManager.getInstance(applicationContext)
-//        workManager.enqueueUniquePeriodicWork(
-//            "SERVER_UPDATE_WORK",
-//            ExistingPeriodicWorkPolicy.REPLACE,
-//            repeatingRequest
-//        )
-//    }
-
-//    override fun getWorkManagerConfiguration(): Configuration {
-//        val workerFactory = MyWorkerFactory(toDoRepository)
-//        return Configuration.Builder()
-//            .setWorkerFactory(workerFactory)
-//            .build()
-//    }
 }
