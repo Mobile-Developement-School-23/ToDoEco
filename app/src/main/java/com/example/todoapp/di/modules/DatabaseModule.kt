@@ -25,7 +25,4 @@ class DatabaseModule {
     @Singleton
     fun provideTaskDao(database: ToDoDatabase): ToDoDao = database.taskDao()
 
-    @Provides
-    @Singleton
-    fun provideDatabaseSource(committer: SharedPreferenceHelper, dao: ToDoDao): DatabaseRepository = DatabaseRepository(committer, dao)
 }

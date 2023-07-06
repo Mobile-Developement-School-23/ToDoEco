@@ -50,7 +50,4 @@ class NetworkModule {
     @Singleton
     fun provideApi(retrofit: Retrofit): ToDoAPI = retrofit.create(ToDoAPI::class.java)
 
-    @Provides
-    @Singleton
-    fun provideNetworkSource(committer: SharedPreferenceHelper, api: ToDoAPI) = NetworkRepository(committer, api)
 }

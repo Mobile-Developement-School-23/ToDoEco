@@ -42,12 +42,4 @@ class AppModule(
         connectivityObserver = connectivityObserver
     )
 
-    @Provides
-    @Singleton
-    fun provideSharedPreferences(context: Context) = SharedPreferenceHelper(context)
-
-    @Provides
-    @Singleton
-    fun provideConnectivityObserver(context: Context) = NetworkConnectivityObserver(context)
-
 }

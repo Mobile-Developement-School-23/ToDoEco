@@ -1,6 +1,5 @@
 package com.example.todoapp.domain
 
-import android.util.Log
 import com.example.todoapp.data.db.DatabaseRepository
 import com.example.todoapp.data.db.RoomState
 import com.example.todoapp.data.network.NetworkRepository
@@ -13,8 +12,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import java.lang.Exception
 import java.util.UUID
+import javax.inject.Inject
 
-class TaskRepository(
+class MainRepository @Inject constructor(
     private val databaseSource: DatabaseRepository,
     private val networkSource: NetworkRepository,
     private val preferenceHelper: SharedPreferenceHelper
@@ -31,19 +31,15 @@ class TaskRepository(
     }
 
     suspend fun mergeTasks() {
-        Log.d("ОШЩЩШ", "jxl")
         networkSource.getTasks().collect { listNetworkState ->
             when (listNetworkState) {
                 is NetworkState.Loading -> {}
                 is NetworkState.Failure -> {
-                    Log.d("ОШЩЩШ", listNetworkState.cause.message.toString())
                 }
                 is NetworkState.Success -> {
-                    Log.d("САКСЭЭЭС", "лдтл")
                     val oldRevision: Int = preferenceHelper.getIntValue()
                     val oldDataList: List<TaskModel> = databaseSource.getTasksAsList()
                     val isActual: Boolean = oldRevision >= listNetworkState.revision
-                    Log.d("ОШЩЩШ", isActual.toString())
                     val data: List<TaskModel> = listOf(
                         oldDataList.map { Pair(true, it) },
                         listNetworkState.data.map { Pair(false, it) }

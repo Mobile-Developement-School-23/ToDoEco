@@ -4,18 +4,16 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.work.CoroutineWorker
-import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
-import com.example.todoapp.domain.TaskRepository
+import com.example.todoapp.domain.MainRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import javax.inject.Inject
-import javax.inject.Provider
+
 class ServerUpdateWorker
     @AssistedInject constructor(
         @Assisted appContext: Context,
         @Assisted workerParams: WorkerParameters,
-        toDoRepository: TaskRepository
+        toDoRepository: MainRepository
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {

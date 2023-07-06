@@ -1,15 +1,12 @@
 package com.example.todoapp.di.modules
 
-import com.example.todoapp.domain.TaskRepository
-import com.example.todoapp.data.db.DatabaseRepository
+import com.example.todoapp.domain.MainRepository
 import com.example.todoapp.data.db.usecases_impl.AddTaskUseCaseImpl
 import com.example.todoapp.data.db.usecases_impl.GetAllTasksUseCaseImpl
 import com.example.todoapp.data.db.usecases_impl.GetItemByIdUseCaseImpl
 import com.example.todoapp.data.db.usecases_impl.MergeTaskUseCaseImpl
 import com.example.todoapp.data.db.usecases_impl.RemoveTaskUseCaseImpl
 import com.example.todoapp.data.db.usecases_impl.UpdateTaskUseCaseImpl
-import com.example.todoapp.data.network.NetworkRepository
-import com.example.todoapp.data.util.SharedPreferenceHelper
 import com.example.todoapp.domain.usecases.AddTaskUseCase
 import com.example.todoapp.domain.usecases.GetAllTasksUseCase
 import com.example.todoapp.domain.usecases.GetItemByIdUseCase
@@ -24,40 +21,32 @@ import javax.inject.Singleton
 class DomainModule {
     @Provides
     @Singleton
-    fun provideTaskGetAllUseCase(repository: TaskRepository): GetAllTasksUseCase =
+    fun provideTaskGetAllUseCase(repository: MainRepository): GetAllTasksUseCase =
         GetAllTasksUseCaseImpl(repository)
 
     @Provides
     @Singleton
-    fun provideTaskGetByIdUseCase(repository: TaskRepository): GetItemByIdUseCase =
+    fun provideTaskGetByIdUseCase(repository: MainRepository): GetItemByIdUseCase =
         GetItemByIdUseCaseImpl(repository)
 
     @Provides
     @Singleton
-    fun provideTaskRemoveUseCase(repository: TaskRepository): RemoveTaskUseCase =
+    fun provideTaskRemoveUseCase(repository: MainRepository): RemoveTaskUseCase =
         RemoveTaskUseCaseImpl(repository)
 
     @Provides
     @Singleton
-    fun provideTaskUpdateUseCase(repository: TaskRepository): UpdateTaskUseCase =
+    fun provideTaskUpdateUseCase(repository: MainRepository): UpdateTaskUseCase =
         UpdateTaskUseCaseImpl(repository)
 
     @Provides
     @Singleton
-    fun provideTaskAddUseCase(repository: TaskRepository): AddTaskUseCase =
+    fun provideTaskAddUseCase(repository: MainRepository): AddTaskUseCase =
         AddTaskUseCaseImpl(repository)
 
     @Provides
     @Singleton
-    fun provideMergeUseCase(repository: TaskRepository): MergeTasksUseCase =
+    fun provideMergeUseCase(repository: MainRepository): MergeTasksUseCase =
         MergeTaskUseCaseImpl(repository)
 
-    @Provides
-    @Singleton
-    fun provideTaskRepository(
-        dataSource: DatabaseRepository,
-        networkSource: NetworkRepository,
-        committer: SharedPreferenceHelper
-    ): TaskRepository =
-        TaskRepository(dataSource, networkSource, committer)
 }

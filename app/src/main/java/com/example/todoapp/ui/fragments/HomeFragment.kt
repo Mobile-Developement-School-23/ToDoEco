@@ -109,15 +109,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             ConnectivityObserver.Status.Unavailable -> {
                 if (internetState != status) {
                     requireView().snackbar("Not internet connection!")
-                    lifecycle.coroutineScope.launch(Dispatchers.IO) {
-                        model.merge().collect {
-                            when (it) {
-                                is UiState.Start -> requireView().snackbar("Loading...")
-                                is UiState.Success -> requireView().snackbar("UP-TO-DATE!")
-                                is UiState.Error -> requireView().snackbar("Refreshing error, try again!")
-                            }
-                        }
-                    }
                 }
             }
 

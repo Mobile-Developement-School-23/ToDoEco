@@ -11,8 +11,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import java.util.UUID
+import javax.inject.Inject
 
-class DatabaseRepository(
+class DatabaseRepository @Inject constructor(
 
     private val committer: SharedPreferenceHelper,
     private val dao: ToDoDao

@@ -1,8 +1,9 @@
 package com.example.todoapp.data.util
 
 import android.content.Context
+import javax.inject.Inject
 
-class SharedPreferenceHelper(
+class SharedPreferenceHelper @Inject constructor(
     val context: Context
 ) {
     private val preferences = context.getSharedPreferences("ToDoPref", 0)
@@ -14,13 +15,6 @@ class SharedPreferenceHelper(
     }
 
     fun updateRevision() {
-        /*
-        * Поскольку на бэке каждая итерация делает +1 не совсем ясно, что было раньше.
-        * Если мы начинаем изменять в оффлайне, патч полностью изменит все последующие данные на сервере,
-        * не синхронизировав их.
-        * */
-        /*val current = getRevision()
-        preferences.edit().putInt("REVISION", 0).apply()
-        Log.d("REVISION-CHECK-UPDATE", getRevision().toString())*/
+
     }
 }
