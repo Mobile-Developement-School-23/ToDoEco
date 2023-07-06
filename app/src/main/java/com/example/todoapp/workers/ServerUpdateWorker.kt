@@ -1,38 +1,36 @@
 package com.example.todoapp.workers
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.example.todoapp.domain.MainRepository
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import com.example.todoapp.ToDoApplication
+import com.example.todoapp.domain.DataState
+import com.example.todoapp.domain.usecases.MergeTasksUseCase
+import javax.inject.Inject
 
-class ServerUpdateWorker
-    @AssistedInject constructor(
-        @Assisted appContext: Context,
-        @Assisted workerParams: WorkerParameters,
-        toDoRepository: MainRepository
+class ServerUpdateWorker(
+        private val appContext: Context,
+        private val workerParams: WorkerParameters,
 ) : CoroutineWorker(appContext, workerParams) {
 
+    @Inject
+    lateinit var mergeCase: MergeTasksUseCase
+
+    init {
+        (appContext.applicationContext as ToDoApplication).appComponent.inject(this)
+    }
+
     override suspend fun doWork(): Result {
-        TODO("Not yet implemented")
-    }
-
-
-    private fun hasInternetConnection(): Boolean {
-        val connectivityManager =
-            applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkCapabilities = connectivityManager.activeNetwork ?: return false
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            else -> false
+        mergeCase().collect { state ->
+            when (state) {
+                is DataState.Result -> {}
+                is DataState.Exception -> {}
+                else -> {}
+            }
         }
+        return Result.success()
     }
+
+
+
 }

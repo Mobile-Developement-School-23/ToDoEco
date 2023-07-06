@@ -1,5 +1,6 @@
 package com.example.todoapp.di.components
 
+import com.example.todoapp.ToDoApplication
 import com.example.todoapp.di.modules.AppModule
 import com.example.todoapp.di.modules.DatabaseModule
 import com.example.todoapp.di.modules.DomainModule
@@ -17,4 +18,5 @@ interface AppComponent {
     fun inject(fragment: HomeFragment)
     fun inject(fragment: EditAddFragment)
     fun inject(fragment: InfoFragment)
+    fun inject(worker: ServerUpdateWorker)
 }
