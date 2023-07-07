@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 class DatabaseRepository @Inject constructor(
 
-    private val committer: SharedPreferenceHelper,
+    private val preferenceHelper: SharedPreferenceHelper,
     private val dao: ToDoDao
 ) {
     fun getTask(id: UUID): Flow<RoomState<TaskModel>> = flow {
@@ -23,7 +23,7 @@ class DatabaseRepository @Inject constructor(
         dao.getTask(id.toString()).collect {
             when (it) {
                 null -> emit(RoomState.Failure(ValidationException("Item not found!")))
-                else -> emit(RoomState.Success(it.toModel(), committer.getIntValue()))
+                else -> emit(RoomState.Success(it.toModel(), preferenceHelper.getIntValue()))
             }
         }
     }.catch {
@@ -39,7 +39,7 @@ class DatabaseRepository @Inject constructor(
         dao.getTasks().collect { list ->
             list.map(TaskEntity::toModel)
                 .sortedByDescending { maxOf(it.creationTime, it.modifyingTime ?: 0) }
-                .also { tasks -> emit(RoomState.Success(tasks, committer.getIntValue())) }
+                .also { tasks -> emit(RoomState.Success(tasks, preferenceHelper.getIntValue())) }
         }
     }.catch {
         emit(RoomState.Failure(it))
@@ -55,6 +55,6 @@ class DatabaseRepository @Inject constructor(
     suspend fun upsertTasks(list: List<TaskModel>, revision: Int) {
         dao.removeTasks()
         dao.updateTasks(list.map(TaskModel::toEntity))
-        committer.setIntValue(revision)
+        preferenceHelper.setIntValue(revision)
     }
 }

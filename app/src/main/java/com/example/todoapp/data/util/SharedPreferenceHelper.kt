@@ -7,7 +7,6 @@ class SharedPreferenceHelper @Inject constructor(
     val context: Context
 ) {
     private val preferences = context.getSharedPreferences("ToDoPref", 0)
-
     fun getIntValue(): Int = preferences.getInt("REVISION", 0)
 
     fun setIntValue(revision: Int) {

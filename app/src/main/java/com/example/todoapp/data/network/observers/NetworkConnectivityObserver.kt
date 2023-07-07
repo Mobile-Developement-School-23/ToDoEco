@@ -13,10 +13,8 @@ import javax.inject.Inject
 class NetworkConnectivityObserver @Inject constructor(
     context: Context
 ) : ConnectivityObserver {
-
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
     override fun observe(): Flow<ConnectivityObserver.Status> {
         return callbackFlow {
             val callback = object : ConnectivityManager.NetworkCallback() {
@@ -24,23 +22,19 @@ class NetworkConnectivityObserver @Inject constructor(
                     super.onAvailable(network)
                     launch { send(ConnectivityObserver.Status.Available) }
                 }
-
                 override fun onLosing(network: Network, maxMsToLive: Int) {
                     super.onLosing(network, maxMsToLive)
                     launch { send(ConnectivityObserver.Status.Losing) }
                 }
-
                 override fun onLost(network: Network) {
                     super.onLost(network)
                     launch { send(ConnectivityObserver.Status.Lost) }
                 }
-
                 override fun onUnavailable() {
                     super.onUnavailable()
                     launch { send(ConnectivityObserver.Status.Unavailable) }
                 }
             }
-
             connectivityManager.registerDefaultNetworkCallback(callback)
             awaitClose {
                 connectivityManager.unregisterNetworkCallback(callback)

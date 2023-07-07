@@ -19,4 +19,5 @@ interface AppComponent {
     fun inject(fragment: EditAddFragment)
     fun inject(fragment: InfoFragment)
     fun inject(worker: ServerUpdateWorker)
+    fun injectTo(application: ToDoApplication)
 }

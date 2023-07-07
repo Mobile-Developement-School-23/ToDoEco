@@ -7,12 +7,12 @@ import com.example.todoapp.domain.usecases.MergeTasksUseCase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class MergeTaskUseCaseImpl(
+class MergeTaskUseCaseImpl (
     private val repository: MainRepository
 ) : MergeTasksUseCase {
     override suspend fun invoke(): Flow<DataState<Boolean>> = flow {
-        Log.d("ОШЩЩШ", "UIFUHU")
         emit(DataState.Initial)
         repository.mergeTasks()
         emit(DataState.Result(true))

@@ -6,15 +6,12 @@ import com.example.todoapp.domain.Importance
 import com.example.todoapp.domain.TaskModel
 import java.util.Locale
 import java.util.UUID
-
 fun TaskEntity.toModel(): TaskModel = TaskModel(
     UUID.fromString(id), text, importance, isDone, creationTime, deadline, modifyingTime
 )
-
 fun TaskModel.toEntity(): TaskEntity = TaskEntity(
     id.toString(), text, priority, isDone, creationTime, deadline, modifyingTime
 )
-
 fun TaskModel.toDto(): Task = Task(
     id,
     text,
@@ -26,7 +23,6 @@ fun TaskModel.toDto(): Task = Task(
     modifyingTime ?: 0,
     "Mick-Android"
 )
-
 fun Task.toModel(): TaskModel = TaskModel(
     id,
     text,

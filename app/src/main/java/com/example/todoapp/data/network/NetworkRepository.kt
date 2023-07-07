@@ -23,7 +23,6 @@ class NetworkRepository @Inject constructor(
     }.catch {
         NetworkState.Failure(it)
     }
-
     fun patchTasks(list: List<TaskModel>): Flow<NetworkState<List<TaskModel>>> = flow {
         emit(NetworkState.Loading)
         val revision = preferenceHelper.getIntValue()
@@ -36,7 +35,6 @@ class NetworkRepository @Inject constructor(
     }.catch {
         emit(NetworkState.Failure(it))
     }
-
     fun postTask(task: TaskModel): Flow<NetworkState<TaskModel>> = flow {
         emit(NetworkState.Loading)
         val revision = preferenceHelper.getIntValue()
@@ -46,7 +44,6 @@ class NetworkRepository @Inject constructor(
     }.catch {
         emit(NetworkState.Failure(it))
     }
-
     fun putTask(task: TaskModel): Flow<NetworkState<TaskModel>> = flow {
         emit(NetworkState.Loading)
         val revision = preferenceHelper.getIntValue()
@@ -56,7 +53,6 @@ class NetworkRepository @Inject constructor(
     }.catch {
         emit(NetworkState.Failure(it))
     }
-
     fun deleteTask(task: TaskModel): Flow<NetworkState<TaskModel>> = flow {
         emit(NetworkState.Loading)
         val revision = preferenceHelper.getIntValue()

@@ -17,31 +17,26 @@ import java.util.UUID
     interface ToDoAPI {
         @GET("list")
         suspend fun getTasks(): TaskListResponse
-
         @PATCH("list")
         suspend fun patchTasks(
             @Header("X-Last-Known-Revision") header: Int,
             @Body body: TaskListRequest
         ):  TaskListResponse
-
         @GET("list/{id}")
         suspend fun getTask(
             @Path("id") id: UUID
         ): TaskResponse
-
         @POST("list")
         suspend fun postTask(
             @Header("X-Last-Known-Revision") header: Int,
             @Body body: TaskRequest
         ): TaskResponse
-
         @PUT("list/{id}")
         suspend fun putTask(
             @Header("X-Last-Known-Revision") header: Int,
             @Path("id") id: UUID,
             @Body body: TaskRequest
         ): TaskResponse
-
         @DELETE("list/{id}")
         suspend fun deleteTask(
             @Header("X-Last-Known-Revision") header: Int,
