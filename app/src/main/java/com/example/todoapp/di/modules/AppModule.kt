@@ -2,6 +2,7 @@ package com.example.todoapp.di.modules
 
 import android.content.Context
 import com.example.todoapp.data.network.observers.NetworkConnectivityObserver
+import com.example.todoapp.di.components.AppScope
 import com.example.todoapp.domain.usecases.AddTaskUseCase
 import com.example.todoapp.domain.usecases.GetAllTasksUseCase
 import com.example.todoapp.domain.usecases.GetItemByIdUseCase
@@ -18,11 +19,11 @@ class AppModule(
     private val context: Context
 ) {
     @Provides
-    @Singleton
+    @AppScope
     fun provideContext(): Context = context
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideTaskViewModelFactory(
         editCase: UpdateTaskUseCase,
         getAllCase: GetAllTasksUseCase,

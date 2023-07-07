@@ -7,6 +7,7 @@ import com.example.todoapp.data.db.usecases_impl.GetItemByIdUseCaseImpl
 import com.example.todoapp.data.db.usecases_impl.MergeTaskUseCaseImpl
 import com.example.todoapp.data.db.usecases_impl.RemoveTaskUseCaseImpl
 import com.example.todoapp.data.db.usecases_impl.UpdateTaskUseCaseImpl
+import com.example.todoapp.di.components.AppScope
 import com.example.todoapp.domain.usecases.AddTaskUseCase
 import com.example.todoapp.domain.usecases.GetAllTasksUseCase
 import com.example.todoapp.domain.usecases.GetItemByIdUseCase
@@ -20,32 +21,32 @@ import javax.inject.Singleton
 @Module
 class DomainModule {
     @Provides
-    @Singleton
+    @AppScope
     fun provideTaskGetAllUseCase(repository: MainRepository): GetAllTasksUseCase =
         GetAllTasksUseCaseImpl(repository)
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideTaskGetByIdUseCase(repository: MainRepository): GetItemByIdUseCase =
         GetItemByIdUseCaseImpl(repository)
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideTaskRemoveUseCase(repository: MainRepository): RemoveTaskUseCase =
         RemoveTaskUseCaseImpl(repository)
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideTaskUpdateUseCase(repository: MainRepository): UpdateTaskUseCase =
         UpdateTaskUseCaseImpl(repository)
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideTaskAddUseCase(repository: MainRepository): AddTaskUseCase =
         AddTaskUseCaseImpl(repository)
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideMergeUseCase(repository: MainRepository): MergeTasksUseCase =
         MergeTaskUseCaseImpl(repository)
 

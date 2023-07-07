@@ -10,9 +10,12 @@ import com.example.todoapp.ui.fragments.HomeFragment
 import com.example.todoapp.ui.fragments.InfoFragment
 import com.example.todoapp.data.network.workers.ServerUpdateWorker
 import dagger.Component
+import javax.inject.Scope
 import javax.inject.Singleton
+@Scope
+annotation class AppScope
 
-@Singleton
+@AppScope
 @Component(dependencies = [], modules = [AppModule::class, DatabaseModule::class, DomainModule::class, NetworkModule::class])
 interface AppComponent {
     fun inject(fragment: HomeFragment)

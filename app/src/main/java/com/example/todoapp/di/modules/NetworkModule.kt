@@ -3,6 +3,7 @@ package com.example.todoapp.di.modules
 import com.example.todoapp.data.network.NetworkRepository
 import com.example.todoapp.data.network.ToDoAPI
 import com.example.todoapp.data.util.SharedPreferenceHelper
+import com.example.todoapp.di.components.AppScope
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -15,15 +16,15 @@ import javax.inject.Singleton
 @Module
 class NetworkModule {
     @Provides
-    @Singleton
+    @AppScope
     fun provideApiUrl(): String = "https://beta.mrdekk.ru/todobackend/"
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideConverterFactory(): GsonConverterFactory = GsonConverterFactory.create()
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideNetworkClient(): OkHttpClient = OkHttpClient.Builder().addInterceptor { chain ->
         val newRequest: Request = chain.request()
             .newBuilder()
@@ -35,7 +36,7 @@ class NetworkModule {
     }).build()
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideRetrofit(
         url: String,
         factory: GsonConverterFactory,
@@ -47,7 +48,7 @@ class NetworkModule {
         .build()
 
     @Provides
-    @Singleton
+    @AppScope
     fun provideApi(retrofit: Retrofit): ToDoAPI = retrofit.create(ToDoAPI::class.java)
 
 }
