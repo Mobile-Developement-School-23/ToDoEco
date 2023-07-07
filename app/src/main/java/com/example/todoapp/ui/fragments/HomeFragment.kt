@@ -89,13 +89,13 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         when (status) {
             ConnectivityObserver.Status.Available -> {
                 if (internetState != status) {
-                    requireView().snackbar("Internet connection is available!")
+                    view?.snackbar("Internet connection is available!")
                     lifecycle.coroutineScope.launch(Dispatchers.IO) {
                         model.merge().collect {
                             when (it) {
-                                is UiState.Start -> requireView().snackbar("Loading...")
-                                is UiState.Success -> requireView().snackbar("UP-TO-DATE!")
-                                is UiState.Error -> requireView().snackbar("Refreshing error, try again!")
+                                is UiState.Start -> view?.snackbar("Loading...")
+                                is UiState.Success -> view?.snackbar("UP-TO-DATE!")
+                                is UiState.Error -> view?.snackbar("Refreshing error, try again!")
                             }
                         }
                     }
@@ -105,19 +105,19 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
             ConnectivityObserver.Status.Unavailable -> {
                 if (internetState != status) {
-                    requireView().snackbar("Not internet connection!")
+                    view?.snackbar("Not internet connection!")
                 }
             }
 
             ConnectivityObserver.Status.Losing -> {
                 if (internetState != status) {
-                    requireView().snackbar("Loss of Internet connection...")
+                    view?.snackbar("Loss of Internet connection...")
                 }
             }
 
             ConnectivityObserver.Status.Lost -> {
                 if (internetState != status) {
-                    requireView().snackbar("The Internet connection is lost.")
+                    view?.snackbar("The Internet connection is lost.")
                 }
             }
         }
@@ -131,9 +131,9 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         lifecycle.coroutineScope.launch(Dispatchers.IO) {
             model.merge().collect {
                 when (it) {
-                    is UiState.Start -> requireView().snackbar("Loading...")
-                    is UiState.Success -> requireView().snackbar("UP-TO-DATE!")
-                    is UiState.Error -> requireView().snackbar("Refreshing error, try again!")
+                    is UiState.Start -> view?.snackbar("Loading...")
+                    is UiState.Success -> view?.snackbar("UP-TO-DATE!")
+                    is UiState.Error -> view?.snackbar("Refreshing error, try again!")
                 }
             }
         }
@@ -168,7 +168,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 lifecycle.coroutineScope.launch(Dispatchers.Main) {
                     model.removeTask(todoItem).collect { uiState ->
                         when (uiState) {
-                            is UiState.Error -> view!!.snackbar(uiState.cause)
+                            is UiState.Error -> view?.snackbar(uiState.cause)
                             else -> {}
                         }
                     }
@@ -259,7 +259,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             lifecycle.coroutineScope.launch(Dispatchers.Main) {
                                 model.removeTask(removedElement).collect { uiState ->
                                     when (uiState) {
-                                        is UiState.Error -> view!!.snackbar(uiState.cause)
+                                        is UiState.Error -> view?.snackbar(uiState.cause)
                                         else -> {}
                                     }
                                 }

@@ -1,11 +1,17 @@
 package com.example.todoapp.ui.fragments
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
@@ -61,12 +67,14 @@ class EditAddFragment : Fragment() {
         // обработка нажатия на "Отмену"
 
         binding.cancelButton.setOnClickListener {
+            animation(binding.cancelButton)
             showCancelWarningDialog()
         }
 
         // обработка нажатия на "Сохранить"
 
         binding.saveButton.setOnClickListener {
+            animation(binding.saveButton)
             if (editAddViewModel.saveOrCreateFlag == 1) { // сохранить старую заметку
                 fillModel()
                 showSaveWarningDialog()
@@ -81,6 +89,7 @@ class EditAddFragment : Fragment() {
         // обработка нажатия на "Удалить"
 
         binding.removeButton.setOnClickListener {
+            animation(binding.removeButton)
             if (editAddViewModel.saveOrCreateFlag == 1) {
                 showRemoveWarningDialog()
             } else if (editAddViewModel.saveOrCreateFlag == 2) {
@@ -117,12 +126,14 @@ class EditAddFragment : Fragment() {
         // обработка нажатия на "Отмену"
 
         binding.cancelButton.setOnClickListener {
+            animation(binding.cancelButton)
             showCancelWarningDialog()
         }
 
         // обработка нажатия на "Сохранить"
 
         binding.saveButton.setOnClickListener {
+            animation(binding.saveButton)
             if (editAddViewModel.saveOrCreateFlag == 1) { // сохранить старую заметку
                 fillModel()
                 showSaveWarningDialog()
@@ -135,6 +146,7 @@ class EditAddFragment : Fragment() {
         // обработка нажатия на "Удалить"
 
         binding.removeButton.setOnClickListener {
+            animation(binding.removeButton)
             if (editAddViewModel.saveOrCreateFlag == 1) {
                 showRemoveWarningDialog()
             } else if (editAddViewModel.saveOrCreateFlag == 2) {
@@ -319,5 +331,34 @@ class EditAddFragment : Fragment() {
             fragment.arguments = bundle
             return fragment
         }
+    }
+    private fun animation(button : Button) {
+        val buttonAnimator = ObjectAnimator.ofPropertyValuesHolder(
+            button,
+            PropertyValuesHolder.ofFloat(View.SCALE_X, 1.2f),
+            PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.2f)
+        )
+        buttonAnimator.duration = 200
+        val fadeAnimator = ObjectAnimator.ofFloat(button, View.ALPHA, 1f, 0f)
+        fadeAnimator.duration = 200
+        val animatorSet = AnimatorSet()
+        animatorSet.playTogether(buttonAnimator, fadeAnimator)
+        val reverseButtonAnimator = ObjectAnimator.ofPropertyValuesHolder(
+            button,
+            PropertyValuesHolder.ofFloat(View.SCALE_X, 1.0f),
+            PropertyValuesHolder.ofFloat(View.SCALE_Y, 1.0f)
+        )
+        reverseButtonAnimator.duration = 200
+        val reverseFadeAnimator = ObjectAnimator.ofFloat(button, View.ALPHA, 1f)
+        reverseFadeAnimator.duration = 200
+        val reverseAnimatorSet = AnimatorSet()
+        reverseAnimatorSet.playTogether(reverseButtonAnimator, reverseFadeAnimator)
+        animatorSet.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                button.alpha = 1f
+                reverseAnimatorSet.start()
+            }
+        })
+        animatorSet.start()
     }
 }
