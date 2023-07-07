@@ -280,10 +280,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                                                 removedElement.priority,
                                                 removedElement.deadline).collect { uiState ->
                                                 when (uiState) {
-                                                    is UiState.Success -> Navigation.findNavController(binding.root).navigate(R.id.nav_home)
-                                                    is UiState.Error -> {
-                                                        Navigation.findNavController(binding.root).navigate(R.id.nav_home)
-                                                    }
+                                                    is UiState.Success -> {}
+                                                    is UiState.Error -> {}
                                                     else -> {}
                                                 }
                                             }

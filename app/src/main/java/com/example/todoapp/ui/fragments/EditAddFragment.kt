@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import com.example.todoapp.R
 import com.example.todoapp.ToDoApplication
@@ -25,6 +26,7 @@ import com.example.todoapp.databinding.FragmentEditBinding
 import com.example.todoapp.domain.Importance
 import com.example.todoapp.domain.TaskModel
 import com.example.todoapp.ui.UiState
+import com.example.todoapp.ui.util.snackbar
 import com.example.todoapp.ui.viewmodels.EditAddViewModel
 import com.example.todoapp.ui.viewmodels.ViewModelFactory
 import kotlinx.coroutines.Dispatchers
@@ -65,14 +67,12 @@ class EditAddFragment : Fragment() {
     override fun onResume() {
 
         // обработка нажатия на "Отмену"
-
         binding.cancelButton.setOnClickListener {
             animation(binding.cancelButton)
             showCancelWarningDialog()
         }
 
         // обработка нажатия на "Сохранить"
-
         binding.saveButton.setOnClickListener {
             animation(binding.saveButton)
             if (editAddViewModel.saveOrCreateFlag == 1) { // сохранить старую заметку
@@ -87,7 +87,6 @@ class EditAddFragment : Fragment() {
         }
 
         // обработка нажатия на "Удалить"
-
         binding.removeButton.setOnClickListener {
             animation(binding.removeButton)
             if (editAddViewModel.saveOrCreateFlag == 1) {
@@ -202,7 +201,11 @@ class EditAddFragment : Fragment() {
             .setMessage("Are you sure you want to close the editor?")
             .setIcon(android.R.drawable.ic_dialog_alert)
             .setPositiveButton("OK") { dialog, _ ->
-                Navigation.findNavController(binding.root).navigate(R.id.nav_home)
+                val builder = NavOptions.Builder()
+                val navOptions: NavOptions =
+                    builder.setEnterAnim(R.anim.slide_out_left).setExitAnim(R.anim.slide_in_right)
+                        .build()
+                Navigation.findNavController(binding.root).navigate(R.id.nav_home, Bundle(), navOptions)
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
@@ -304,8 +307,14 @@ class EditAddFragment : Fragment() {
             editAddViewModel.removeTask().collect { uiState ->
                 when (uiState) {
                     is UiState.Start -> {}
-                    is UiState.Success -> Navigation.findNavController(binding.root).navigate(R.id.nav_home)
-                    is UiState.Error -> Navigation.findNavController(binding.root).navigate(R.id.nav_home)
+                    is UiState.Success -> {
+                        val builder = NavOptions.Builder()
+                        val navOptions: NavOptions =
+                            builder.setEnterAnim(R.anim.slide_out_left).setExitAnim(R.anim.slide_in_right)
+                                .build()
+                        Navigation.findNavController(binding.root).navigate(R.id.nav_home, Bundle(), navOptions)
+                    }
+                    is UiState.Error -> view?.snackbar("A deletion error has occurred, try again!")
                     }
                 }
             }
@@ -315,10 +324,14 @@ class EditAddFragment : Fragment() {
         lifecycle.coroutineScope.launch {
             editAddViewModel.addTask().collect { uiState ->
                 when (uiState) {
-                    is UiState.Success -> Navigation.findNavController(binding.root).navigate(R.id.nav_home)
-                    is UiState.Error -> {
-                        Navigation.findNavController(binding.root).navigate(R.id.nav_home)
+                    is UiState.Success -> {
+                        val builder = NavOptions.Builder()
+                        val navOptions: NavOptions =
+                            builder.setEnterAnim(R.anim.slide_out_left).setExitAnim(R.anim.slide_in_right)
+                                .build()
+                        Navigation.findNavController(binding.root).navigate(R.id.nav_home, Bundle(), navOptions)
                     }
+                    is UiState.Error -> view?.snackbar("There was an error adding a task, try again!")
                     else -> {}
                 }
             }
