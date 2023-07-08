@@ -11,9 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
-import com.example.todoapp.R
 import com.example.todoapp.databinding.SettingsFragmentBinding
-import com.example.todoapp.ui.util.snackbar
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -37,7 +35,7 @@ class SettingsFragment : BottomSheetDialogFragment() {
         super.onActivityCreated(savedInstanceState)
         dialog?.window?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)?.let { sheet ->
             val animator = ObjectAnimator.ofFloat(sheet, View.TRANSLATION_Y, sheet.height.toFloat(), 0f)
-            animator.duration = 500 // Set the duration of the animation (in milliseconds)
+            animator.duration = 500
             animator.start()
         }
     }
