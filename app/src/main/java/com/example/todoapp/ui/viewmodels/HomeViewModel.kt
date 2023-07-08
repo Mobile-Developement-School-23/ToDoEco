@@ -53,6 +53,7 @@ class HomeViewModel(
 
     private val _doneCounter: MutableStateFlow<Int> = MutableStateFlow(0)
     val doneCounter: StateFlow<Int> get() = _doneCounter
+    private var selectedTheme: String = ""
 
     init {
         startObserveNetwork()

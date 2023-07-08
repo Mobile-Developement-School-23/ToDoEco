@@ -2,26 +2,29 @@ package com.example.todoapp.ui.activity
 
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.Menu
 import android.view.View
-import com.google.android.material.navigation.NavigationView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.drawerlayout.widget.DrawerLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.work.Constraints
 import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.airbnb.lottie.LottieAnimationView
 import com.example.todoapp.R
-import com.example.todoapp.databinding.ActivityMainBinding
 import com.example.todoapp.data.network.workers.ServerUpdateWorker
+import com.example.todoapp.databinding.ActivityMainBinding
+import com.example.todoapp.ui.fragments.SettingsFragment
+import com.google.android.material.navigation.NavigationView
 import java.util.concurrent.TimeUnit
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -58,6 +61,15 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         WorkManager.getInstance(this).enqueue(periodicWorkRequest)
+
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_settings) {
+                val bottomSheetFragment = SettingsFragment()
+                bottomSheetFragment.show(supportFragmentManager, "bottomSheet")
+                true
+            } else false
+        }
 
     }
 
