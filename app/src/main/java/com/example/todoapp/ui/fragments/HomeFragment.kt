@@ -1,12 +1,21 @@
 package com.example.todoapp.ui.fragments
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
+import android.os.CountDownTimer
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -27,6 +36,7 @@ import com.example.todoapp.data.network.observers.ConnectivityObserver
 import com.example.todoapp.databinding.FragmentHomeBinding
 import com.example.todoapp.domain.TaskModel
 import com.example.todoapp.ui.UiState
+import com.example.todoapp.ui.activity.MainActivity
 import com.example.todoapp.ui.recycler.adapters.ToDoActionListener
 import com.example.todoapp.ui.recycler.adapters.ToDoAdapter
 import com.example.todoapp.ui.viewmodels.HomeViewModel
@@ -58,6 +68,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var navController: NavController
     private var internetState = ConnectivityObserver.Status.Unavailable
+    private lateinit var snackbar: Snackbar
+    private lateinit var countdownTimer: CountDownTimer
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -165,6 +177,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         recyclerView = _binding!!.taskRecycler
         adapter = ToDoAdapter(object : ToDoActionListener {
             override fun onToDoItemDelete(todoItem: TaskModel) {
+                showSnackbar(requireContext(), todoItem)
                 lifecycle.coroutineScope.launch(Dispatchers.Main) {
                     model.removeTask(todoItem).collect { uiState ->
                         when (uiState) {
@@ -186,6 +199,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                 navController.navigate(R.id.nav_gallery, bundle, navOptions)
             }
             override fun onCheckTask(todoItem: TaskModel, isChecked: Boolean) {
+                (activity as MainActivity).party()
                 var changed = todoItem.copy(isDone = isChecked)
                 lifecycleScope.launch(Dispatchers.Main) {
                     model.setTask(changed).collect { uiState ->
@@ -324,4 +338,73 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         val fragment = InfoFragment.newInstance(bundle)
         fragment.show(requireActivity().supportFragmentManager, "info!")
     }
+
+    fun cutStringAndAddColon(input: String): String {
+        return if (input.length > 10) {
+            input.substring(0, 10) + "..."
+        } else {
+            input
+        }
+    }
+
+    private fun showSnackbar(context: Context, task: TaskModel) {
+        snackbar = Snackbar.make(requireView(), "", Snackbar.LENGTH_INDEFINITE)
+        val snackbarView = snackbar.view
+        val snackbarLayout = snackbarView as Snackbar.SnackbarLayout
+        snackbarLayout.setBackgroundColor(Color.GRAY)
+        snackbarLayout.minimumHeight = resources.getDimensionPixelSize(R.dimen.snackbar_height)
+        val appearanceDuration = 2000L
+        val disappearanceDuration = 1000L
+        val totalDuration = 5000L
+        val fadeInAnimator = ValueAnimator.ofFloat(0f, 1f)
+        fadeInAnimator.duration = appearanceDuration
+        fadeInAnimator.interpolator = DecelerateInterpolator()
+        fadeInAnimator.addUpdateListener { animation ->
+            val alpha = (animation.animatedValue as Float * 255).toInt()
+            snackbarLayout.setBackgroundColor(Color.argb(alpha, 128, 32, 32))
+        }
+        val fadeOutAnimator = ValueAnimator.ofFloat(1f, 0f)
+        fadeOutAnimator.duration = disappearanceDuration
+        fadeOutAnimator.interpolator = AccelerateInterpolator()
+        fadeOutAnimator.addUpdateListener { animation ->
+            val alpha = (animation.animatedValue as Float * 255).toInt()
+            snackbarLayout.setBackgroundColor(Color.argb(alpha, 128, 32, 32))
+        }
+        countdownTimer = object : CountDownTimer(totalDuration, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val secondsRemaining = (millisUntilFinished / 1000).toInt()
+                snackbar.setText("Task: " + cutStringAndAddColon(task.text) + "    $secondsRemaining")
+            }
+            override fun onFinish() {
+                snackbar.dismiss()
+            }
+        }
+        snackbar.setAction(getString(R.string.cancel)) {
+            lifecycle.coroutineScope.launch {
+                model.addTask(task.text,
+                    task.priority,
+                    task.deadline).collect { uiState ->
+                    when (uiState) {
+                        is UiState.Success -> {}
+                        is UiState.Error -> {}
+                        else -> {}
+                    }
+                }
+            }
+            snackbar.dismiss()
+            countdownTimer.cancel()
+        }
+        snackbar.show()
+        fadeInAnimator.start()
+        countdownTimer.start()
+        Handler().postDelayed({
+            fadeOutAnimator.start()
+        }, totalDuration - disappearanceDuration)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        countdownTimer.cancel()
+    }
+
 }
