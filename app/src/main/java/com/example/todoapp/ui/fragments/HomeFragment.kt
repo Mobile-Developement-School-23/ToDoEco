@@ -68,8 +68,8 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var navController: NavController
     private var internetState = ConnectivityObserver.Status.Unavailable
-    private lateinit var snackbar: Snackbar
-    private lateinit var countdownTimer: CountDownTimer
+//    private lateinit var snackbar: Snackbar
+//    private lateinit var countdownTimer: CountDownTimer
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -348,7 +348,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     }
 
     private fun showSnackbar(context: Context, task: TaskModel) {
-        snackbar = Snackbar.make(requireView(), "", Snackbar.LENGTH_INDEFINITE)
+        val snackbar = Snackbar.make(requireView(), "", Snackbar.LENGTH_INDEFINITE)
         val snackbarView = snackbar.view
         val snackbarLayout = snackbarView as Snackbar.SnackbarLayout
         snackbarLayout.setBackgroundColor(Color.GRAY)
@@ -370,7 +370,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             val alpha = (animation.animatedValue as Float * 255).toInt()
             snackbarLayout.setBackgroundColor(Color.argb(alpha, 128, 32, 32))
         }
-        countdownTimer = object : CountDownTimer(totalDuration, 1000) {
+        val countdownTimer = object : CountDownTimer(totalDuration, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val secondsRemaining = (millisUntilFinished / 1000).toInt()
                 snackbar.setText("Task: " + cutStringAndAddColon(task.text) + "    $secondsRemaining")
@@ -404,7 +404,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        countdownTimer.cancel()
     }
 
 }

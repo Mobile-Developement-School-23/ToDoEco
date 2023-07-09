@@ -44,4 +44,5 @@
     <string name="edit_or_add_task">Edit or add task</string>
     <string name="notifications">Notification time</string>
 
+    <string name="permission">Give permission for notifications to receive messages about the approaching deadline of tasks!</string>
 </resources>
