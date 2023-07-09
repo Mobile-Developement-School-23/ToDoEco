@@ -23,17 +23,12 @@ class EditAddViewModel(
     private val removeCase: RemoveTaskUseCase,
     private val addCase: AddTaskUseCase
 ) : ViewModel() {
-
-
     private var _saveOrCreateFlag : Int = 0
     val saveOrCreateFlag : Int get() = _saveOrCreateFlag
-
-
     private var _toDoItem : TaskModel = TaskModel(UUID.randomUUID(),
         "", Importance.BASIC, false, Date().time, null, Date().time)
     val toDoItem : TaskModel get() = _toDoItem
-
-
+    var selectedTime: String = ""
 
     fun addTask(): Flow<UiState<String>> = flow {
         emit(UiState.Start)

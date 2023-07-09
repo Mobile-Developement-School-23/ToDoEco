@@ -82,9 +82,9 @@
             android:visibility="gone"
             android:yearListSelectorColor="@color/green_Empress"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.586"
+            app:layout_constraintHorizontal_bias="0.482"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textShowCalendar" />
+            app:layout_constraintTop_toBottomOf="@+id/notificationButton" />
 
         <TextView
             android:id="@+id/importanceText"
@@ -186,6 +186,19 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/myDeadlineDatePicker" />
+
+        <ImageButton
+            android:id="@+id/notificationButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_background"
+            android:padding="8dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textShowCalendar"
+            app:srcCompat="@drawable/notification_svgrepo_com" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

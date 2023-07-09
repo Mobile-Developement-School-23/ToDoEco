@@ -42,5 +42,6 @@
     <string name="info">See more info...</string>
     <string name="plant_logo">Plant logo</string>
     <string name="edit_or_add_task">Edit or add task</string>
+    <string name="notifications">Notification time</string>
 
 </resources>

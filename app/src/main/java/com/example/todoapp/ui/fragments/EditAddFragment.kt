@@ -6,6 +6,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.app.AlertDialog
+import android.app.TimePickerDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
@@ -58,20 +60,17 @@ class EditAddFragment : Fragment() {
         val root: View = binding.root
         arguments?.let {
             editAddViewModel.setFlag(it.getInt("SAVE_OR_EDIT_FLAG"))
-            Log.d("О ПРИВЕТ 2", it.getString("TASK_ID").toString())
            setItemById(it.getString("TASK_ID").toString())
         }
         return root
     }
 
     override fun onResume() {
-
         // обработка нажатия на "Отмену"
         binding.cancelButton.setOnClickListener {
             animation(binding.cancelButton)
             showCancelWarningDialog()
         }
-
         // обработка нажатия на "Сохранить"
         binding.saveButton.setOnClickListener {
             animation(binding.saveButton)
@@ -85,7 +84,6 @@ class EditAddFragment : Fragment() {
             } else
                 Toast.makeText(context,"dgnjkdllxd", Toast.LENGTH_SHORT).show()
         }
-
         // обработка нажатия на "Удалить"
         binding.removeButton.setOnClickListener {
             animation(binding.removeButton)
@@ -97,7 +95,6 @@ class EditAddFragment : Fragment() {
         }
         super.onResume()
     }
-
     private fun setItemById(id: String) {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
@@ -105,7 +102,6 @@ class EditAddFragment : Fragment() {
             }
         }
     }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         init()
@@ -116,21 +112,17 @@ class EditAddFragment : Fragment() {
         }
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, onBackPressedCallback)
     }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
     private fun init() {
         // обработка нажатия на "Отмену"
-
         binding.cancelButton.setOnClickListener {
             animation(binding.cancelButton)
             showCancelWarningDialog()
         }
-
         // обработка нажатия на "Сохранить"
-
         binding.saveButton.setOnClickListener {
             animation(binding.saveButton)
             if (editAddViewModel.saveOrCreateFlag == 1) { // сохранить старую заметку
@@ -141,9 +133,7 @@ class EditAddFragment : Fragment() {
                 showNewSaveWarningDialog()
             }
         }
-
         // обработка нажатия на "Удалить"
-
         binding.removeButton.setOnClickListener {
             animation(binding.removeButton)
             if (editAddViewModel.saveOrCreateFlag == 1) {
@@ -152,21 +142,21 @@ class EditAddFragment : Fragment() {
                 showCancelWarningDialog()
             }
         }
-
         // в зависимости от того, хочет ли пользователь установить дедлайн -
         // показать и скрыть календарь
-
         binding.showCalendar.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
+                binding.notificationButton.visibility = View.VISIBLE
                 binding.myDeadlineDatePicker.visibility = View.VISIBLE
             } else {
                 binding.myDeadlineDatePicker.visibility = View.GONE
+                binding.notificationButton.visibility = View.GONE
             }
         }
-
+        binding.notificationButton.setOnClickListener {
+            showTimePickerDialog()
+        }
         // заполнение данных по объекту из ViewModel
-
-
         val text = editAddViewModel.toDoItem.text
         Log.d("ELEMENT_NEW_FRAGMENT", text)
         binding.descriptionInput.setText(text)
@@ -194,7 +184,6 @@ class EditAddFragment : Fragment() {
             binding.myDeadlineDatePicker.visibility = View.GONE
         }
     }
-
     private fun showCancelWarningDialog() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Cancel")
@@ -373,5 +362,20 @@ class EditAddFragment : Fragment() {
             }
         })
         animatorSet.start()
+    }
+    private fun showTimePickerDialog() {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+        val timePickerDialog = TimePickerDialog(
+            requireContext(),
+            { _, hourOfDay, minute ->
+                editAddViewModel.selectedTime = String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute)
+            },
+            hour,
+            minute,
+            true
+        )
+        timePickerDialog.show()
     }
 }
