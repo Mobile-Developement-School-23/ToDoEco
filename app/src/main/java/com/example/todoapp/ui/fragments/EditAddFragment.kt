@@ -5,10 +5,13 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
+import android.app.AlarmManager
 import android.app.AlertDialog
+import android.app.PendingIntent
 import android.app.TimePickerDialog
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +30,7 @@ import com.example.todoapp.databinding.FragmentEditBinding
 import com.example.todoapp.domain.Importance
 import com.example.todoapp.domain.TaskModel
 import com.example.todoapp.ui.UiState
+import com.example.todoapp.ui.receivers.NotificationReceiver
 import com.example.todoapp.ui.util.snackbar
 import com.example.todoapp.ui.viewmodels.EditAddViewModel
 import com.example.todoapp.ui.viewmodels.ViewModelFactory
@@ -48,6 +52,52 @@ class EditAddFragment : Fragment() {
     lateinit var modelFactory: ViewModelFactory
     private val editAddViewModel: EditAddViewModel by lazy {
         ViewModelProvider(this, modelFactory)[EditAddViewModel::class.java]
+    }
+    private val NOTIFICATION_REQUEST_CODE = 100
+
+    private fun scheduleNotification(context: Context, notificationTime: Calendar, task : TaskModel) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, NotificationReceiver::class.java).apply {
+            putExtra("title", task.text)
+            when(task.priority) {
+                Importance.LOW -> putExtra("priority", "Low importance")
+                Importance.BASIC -> putExtra("priority", "Basic importance")
+                Importance.IMPORTANT -> putExtra("priority", "High importance")
+                else -> putExtra("priority", "Basic importance")
+            }
+        }
+        val pendingIntent = PendingIntent.getBroadcast(context, NOTIFICATION_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        alarmManager.set(AlarmManager.RTC_WAKEUP, notificationTime.timeInMillis, pendingIntent)
+    }
+
+    private fun createNotification(task: TaskModel) {
+        var hoursMinutes = editAddViewModel.selectedTime
+        if (hoursMinutes == "") {
+            hoursMinutes = "00:00"
+        }
+
+        if (task.deadline != null) {
+            val timeParts = hoursMinutes.split(":")
+            val minutes = timeParts[0].toIntOrNull() ?: 0
+            val seconds = timeParts[1].toIntOrNull() ?: 0
+            val formattedHours = minutes.toString().trimStart('0')
+            val formattedMinutes = seconds.toString().trimStart('0')
+            val notificationTime = Calendar.getInstance()
+            val deadline = task.deadline
+            notificationTime.timeInMillis = deadline!!
+            val year = notificationTime.get(Calendar.YEAR)
+            val month = notificationTime.get(Calendar.MONTH)
+            val day = notificationTime.get(Calendar.DAY_OF_MONTH)
+
+            notificationTime.set(Calendar.YEAR, year)
+            notificationTime.set(Calendar.MONTH, month)
+            notificationTime.set(Calendar.DAY_OF_MONTH, day)
+            notificationTime.set(Calendar.HOUR_OF_DAY, formattedHours.toInt())
+            notificationTime.set(Calendar.MINUTE, formattedMinutes.toInt())
+            notificationTime.set(Calendar.SECOND, 0)
+
+            scheduleNotification(requireContext(), notificationTime, task)
+        }
     }
 
     override fun onCreateView(
@@ -158,7 +208,6 @@ class EditAddFragment : Fragment() {
         }
         // заполнение данных по объекту из ViewModel
         val text = editAddViewModel.toDoItem.text
-        Log.d("ELEMENT_NEW_FRAGMENT", text)
         binding.descriptionInput.setText(text)
         val importance = editAddViewModel.toDoItem.priority
         val deadline : Long? = editAddViewModel.toDoItem.deadline
@@ -283,7 +332,14 @@ class EditAddFragment : Fragment() {
             editAddViewModel.setTask().collect { uiState: UiState<String> ->
                 when (uiState) {
                     is UiState.Start -> {}
-                    is UiState.Success -> Navigation.findNavController(binding.root).navigate(R.id.nav_home)
+                    is UiState.Success -> {
+                        createNotification(editAddViewModel.toDoItem)
+                        val builder = NavOptions.Builder()
+                        val navOptions: NavOptions =
+                            builder.setEnterAnim(R.anim.slide_out_left).setExitAnim(R.anim.slide_in_right)
+                                .build()
+                        Navigation.findNavController(binding.root).navigate(R.id.nav_home, Bundle(), navOptions)
+                    }
                     is UiState.Error -> Navigation.findNavController(binding.root).navigate(R.id.nav_home)
                     }
                 }
@@ -314,6 +370,7 @@ class EditAddFragment : Fragment() {
             editAddViewModel.addTask().collect { uiState ->
                 when (uiState) {
                     is UiState.Success -> {
+                        createNotification(editAddViewModel.toDoItem)
                         val builder = NavOptions.Builder()
                         val navOptions: NavOptions =
                             builder.setEnterAnim(R.anim.slide_out_left).setExitAnim(R.anim.slide_in_right)

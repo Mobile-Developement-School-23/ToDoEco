@@ -11,6 +11,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.core.app.ActivityCompat.recreate
+import com.example.todoapp.R
 import com.example.todoapp.databinding.SettingsFragmentBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -83,8 +85,19 @@ class SettingsFragment : BottomSheetDialogFragment() {
         binding.saveButton.setOnClickListener {
             if (theme != "") {
                 editor.putString("theme", theme)
+                when (theme) {
+                    "dark" -> changeTheme(R.style.Theme_ToDoApp_NoActionBar)
+                    "light" -> changeTheme(androidx.appcompat.R.style.Theme_AppCompat_DayNight)
+                }
+                changeTheme(android.R.style.Theme_DeviceDefault)
             }
+
         }
+    }
+
+    private fun changeTheme(themeId: Int) {
+        requireContext().setTheme(themeId)
+        recreate(requireActivity())
     }
 
     private fun setAnimation(R : Int, G : Int, B : Int) {
