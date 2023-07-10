@@ -15,40 +15,41 @@ import javax.inject.Singleton
 
 @Module
 class NetworkModule {
-    @Provides
-    @AppScope
-    fun provideApiUrl(): String = "https://beta.mrdekk.ru/todobackend/"
+    companion object {
+        @Provides
+        @AppScope
+        fun provideApiUrl(): String = "https://beta.mrdekk.ru/todobackend/"
 
-    @Provides
-    @AppScope
-    fun provideConverterFactory(): GsonConverterFactory = GsonConverterFactory.create()
+        @Provides
+        @AppScope
+        fun provideConverterFactory(): GsonConverterFactory = GsonConverterFactory.create()
 
-    @Provides
-    @AppScope
-    fun provideNetworkClient(): OkHttpClient = OkHttpClient.Builder().addInterceptor { chain ->
-        val newRequest: Request = chain.request()
-            .newBuilder()
-            .addHeader("Authorization", "Bearer leuchemia")
+        @Provides
+        @AppScope
+        fun provideNetworkClient(): OkHttpClient = OkHttpClient.Builder().addInterceptor { chain ->
+            val newRequest: Request = chain.request()
+                .newBuilder()
+                .addHeader("Authorization", "Bearer leuchemia")
+                .build()
+            chain.proceed(newRequest)
+        }.addInterceptor(HttpLoggingInterceptor().also {
+            it.level = HttpLoggingInterceptor.Level.BODY
+        }).build()
+
+        @Provides
+        @AppScope
+        fun provideRetrofit(
+            url: String,
+            factory: GsonConverterFactory,
+            client: OkHttpClient
+        ): Retrofit = Retrofit.Builder()
+            .baseUrl(url)
+            .addConverterFactory(factory)
+            .client(client)
             .build()
-        chain.proceed(newRequest)
-    }.addInterceptor(HttpLoggingInterceptor().also {
-        it.level = HttpLoggingInterceptor.Level.BODY
-    }).build()
 
-    @Provides
-    @AppScope
-    fun provideRetrofit(
-        url: String,
-        factory: GsonConverterFactory,
-        client: OkHttpClient
-    ): Retrofit = Retrofit.Builder()
-        .baseUrl(url)
-        .addConverterFactory(factory)
-        .client(client)
-        .build()
-
-    @Provides
-    @AppScope
-    fun provideApi(retrofit: Retrofit): ToDoAPI = retrofit.create(ToDoAPI::class.java)
-
+        @Provides
+        @AppScope
+        fun provideApi(retrofit: Retrofit): ToDoAPI = retrofit.create(ToDoAPI::class.java)
+    }
 }

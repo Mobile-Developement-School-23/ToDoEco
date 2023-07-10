@@ -1,8 +1,7 @@
 package com.example.todoapp.di.modules
 
-import android.content.Context
 import com.example.todoapp.data.network.observers.NetworkConnectivityObserver
-import com.example.todoapp.di.components.AppScope
+import com.example.todoapp.di.components.ActivityScope
 import com.example.todoapp.domain.usecases.AddTaskUseCase
 import com.example.todoapp.domain.usecases.GetAllTasksUseCase
 import com.example.todoapp.domain.usecases.GetItemByIdUseCase
@@ -12,18 +11,14 @@ import com.example.todoapp.domain.usecases.UpdateTaskUseCase
 import com.example.todoapp.ui.viewmodels.ViewModelFactory
 import dagger.Module
 import dagger.Provides
-import javax.inject.Singleton
 
 @Module
-class AppModule(
-    private val context: Context
+class ViewModelModule(
+
 ) {
-    @Provides
-    @AppScope
-    fun provideContext(): Context = context
 
     @Provides
-    @AppScope
+    @ActivityScope
     fun provideTaskViewModelFactory(
         editCase: UpdateTaskUseCase,
         getAllCase: GetAllTasksUseCase,

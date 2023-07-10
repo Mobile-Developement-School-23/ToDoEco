@@ -1,26 +1,29 @@
 package com.example.todoapp.di.components
 
+import android.content.Context
 import com.example.todoapp.ToDoApplication
-import com.example.todoapp.di.modules.AppModule
 import com.example.todoapp.di.modules.DatabaseModule
-import com.example.todoapp.di.modules.DomainModule
 import com.example.todoapp.di.modules.NetworkModule
-import com.example.todoapp.ui.fragments.EditAddFragment
-import com.example.todoapp.ui.fragments.HomeFragment
-import com.example.todoapp.ui.fragments.InfoFragment
-import com.example.todoapp.data.network.workers.ServerUpdateWorker
+import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Scope
-import javax.inject.Singleton
 @Scope
 annotation class AppScope
 
 @AppScope
-@Component(dependencies = [], modules = [AppModule::class, DatabaseModule::class, DomainModule::class, NetworkModule::class])
+@Component(modules = [DatabaseModule::class, NetworkModule::class])
 interface AppComponent {
-    fun inject(fragment: HomeFragment)
-    fun inject(fragment: EditAddFragment)
-    fun inject(fragment: InfoFragment)
-    fun inject(worker: ServerUpdateWorker)
+
+    @Component.Factory
+    interface Factory {
+        fun create(@BindsInstance context: Context): AppComponent
+    }
+
+    fun activityComponent(): ActivityComponent
+
+//    fun inject(fragment: HomeFragment)
+//    fun inject(fragment: EditAddFragment)
+//    fun inject(fragment: InfoFragment)
+//    fun inject(worker: ServerUpdateWorker)
     fun injectTo(application: ToDoApplication)
 }

@@ -76,7 +76,7 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        (requireContext().applicationContext as ToDoApplication).appComponent.inject(this)
+        (requireActivity() as MainActivity).activityComponent.inject(this)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
         navController = findNavController()

@@ -25,8 +25,10 @@ import androidx.work.WorkManager
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
 import com.example.todoapp.R
+import com.example.todoapp.ToDoApplication
 import com.example.todoapp.data.network.workers.ServerUpdateWorker
 import com.example.todoapp.databinding.ActivityMainBinding
+import com.example.todoapp.di.components.ActivityComponent
 import com.example.todoapp.ui.fragments.SettingsFragment
 import com.google.android.material.navigation.NavigationView
 import java.util.concurrent.TimeUnit
@@ -37,9 +39,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
     private lateinit var sharedPreferences: SharedPreferences
+    lateinit var activityComponent: ActivityComponent
+        private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activityComponent = (applicationContext as ToDoApplication).applicationComponent.activityComponent()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)

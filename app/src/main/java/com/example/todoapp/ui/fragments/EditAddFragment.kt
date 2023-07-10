@@ -30,6 +30,7 @@ import com.example.todoapp.databinding.FragmentEditBinding
 import com.example.todoapp.domain.Importance
 import com.example.todoapp.domain.TaskModel
 import com.example.todoapp.ui.UiState
+import com.example.todoapp.ui.activity.MainActivity
 import com.example.todoapp.ui.receivers.NotificationReceiver
 import com.example.todoapp.ui.util.snackbar
 import com.example.todoapp.ui.viewmodels.EditAddViewModel
@@ -105,7 +106,7 @@ class EditAddFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        (requireContext().applicationContext as ToDoApplication).appComponent.inject(this)
+        (requireActivity() as MainActivity).activityComponent.inject(this)
         _binding = FragmentEditBinding.inflate(inflater, container, false)
         val root: View = binding.root
         arguments?.let {
