@@ -164,7 +164,7 @@ class EditAddFragment : Fragment() {
             binding.showCalendar.isChecked = true
             binding.myDeadlineDatePicker.visibility = View.VISIBLE
             val calendar = Calendar.getInstance()
-            calendar.time = Date()
+            calendar.timeInMillis = deadline
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)
             val day = calendar.get(Calendar.DAY_OF_MONTH)
@@ -253,7 +253,7 @@ class EditAddFragment : Fragment() {
             binding.showCalendar.isChecked = true
             binding.myDeadlineDatePicker.visibility = View.VISIBLE
             val calendar = Calendar.getInstance()
-            calendar.time = Date()
+            calendar.timeInMillis = deadline
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)
             val day = calendar.get(Calendar.DAY_OF_MONTH)
