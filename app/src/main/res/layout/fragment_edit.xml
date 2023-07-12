@@ -6,7 +6,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_rampart">
+    android:background="?attr/background"
+    >
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -148,7 +149,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/sneaky_Sesame"
+            android:backgroundTint="?attr/floatingActionButtonLargePrimaryStyle"
             android:fontFamily="@font/ubuntu"
             android:text="@string/cancel"
             android:textColor="@color/black_Olive"
@@ -162,7 +163,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:backgroundTint="@color/sneaky_Sesame"
+            android:backgroundTint="?attr/floatingActionButtonLargePrimaryStyle"
             android:fontFamily="@font/ubuntu"
             android:text="@string/save"
             android:textColor="@color/black_Olive"
@@ -177,7 +178,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/sneaky_Sesame"
+            android:backgroundTint="?attr/floatingActionButtonLargePrimaryStyle"
             android:fontFamily="@font/ubuntu"
             android:text="@string/remove"
             android:textColor="@color/black_Olive"

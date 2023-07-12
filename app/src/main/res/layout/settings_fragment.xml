@@ -5,7 +5,7 @@
     android:id="@+id/settingsLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_rampart">
+    android:background="?attr/background">
 
     <TextView
         android:id="@+id/titleTextView"
@@ -71,6 +71,7 @@
         android:gravity="center"
         android:text="Save"
         android:textColor="@color/black_Olive"
+        app:backgroundTint="?attr/floatingActionButtonLargePrimaryStyle"
         app:cornerRadius="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.01"

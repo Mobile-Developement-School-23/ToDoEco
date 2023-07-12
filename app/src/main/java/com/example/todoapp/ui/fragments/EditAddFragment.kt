@@ -12,6 +12,7 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,19 +26,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation
 import com.example.todoapp.R
-import com.example.todoapp.ToDoApplication
 import com.example.todoapp.databinding.FragmentEditBinding
 import com.example.todoapp.domain.Importance
 import com.example.todoapp.domain.TaskModel
 import com.example.todoapp.ui.UiState
 import com.example.todoapp.ui.activity.MainActivity
 import com.example.todoapp.ui.receivers.NotificationReceiver
+import com.example.todoapp.ui.util.NotificationHelper
 import com.example.todoapp.ui.util.snackbar
 import com.example.todoapp.ui.viewmodels.EditAddViewModel
 import com.example.todoapp.ui.viewmodels.ViewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -54,7 +56,6 @@ class EditAddFragment : Fragment() {
     private val editAddViewModel: EditAddViewModel by lazy {
         ViewModelProvider(this, modelFactory)[EditAddViewModel::class.java]
     }
-    private val NOTIFICATION_REQUEST_CODE = 100
 
     private fun scheduleNotification(context: Context, notificationTime: Calendar, task : TaskModel) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -66,38 +67,35 @@ class EditAddFragment : Fragment() {
                 Importance.IMPORTANT -> putExtra("priority", "High importance")
                 else -> putExtra("priority", "Basic importance")
             }
+            putExtra("taskId", task.id.toString())
         }
-        val pendingIntent = PendingIntent.getBroadcast(context, NOTIFICATION_REQUEST_CODE, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getBroadcast(context, task.id.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT)
         alarmManager.set(AlarmManager.RTC_WAKEUP, notificationTime.timeInMillis, pendingIntent)
     }
 
     private fun createNotification(task: TaskModel) {
-        var hoursMinutes = editAddViewModel.selectedTime
-        if (hoursMinutes == "") {
-            hoursMinutes = "00:00"
-        }
-
-        if (task.deadline != null) {
-            val timeParts = hoursMinutes.split(":")
-            val minutes = timeParts[0].toIntOrNull() ?: 0
-            val seconds = timeParts[1].toIntOrNull() ?: 0
-            val formattedHours = minutes.toString().trimStart('0')
-            val formattedMinutes = seconds.toString().trimStart('0')
-            val notificationTime = Calendar.getInstance()
-            val deadline = task.deadline
-            notificationTime.timeInMillis = deadline!!
-            val year = notificationTime.get(Calendar.YEAR)
-            val month = notificationTime.get(Calendar.MONTH)
-            val day = notificationTime.get(Calendar.DAY_OF_MONTH)
-
-            notificationTime.set(Calendar.YEAR, year)
-            notificationTime.set(Calendar.MONTH, month)
-            notificationTime.set(Calendar.DAY_OF_MONTH, day)
-            notificationTime.set(Calendar.HOUR_OF_DAY, formattedHours.toInt())
-            notificationTime.set(Calendar.MINUTE, formattedMinutes.toInt())
-            notificationTime.set(Calendar.SECOND, 0)
-
-            scheduleNotification(requireContext(), notificationTime, task)
+        if (editAddViewModel.selectedTime != "99:99") {
+            val hoursMinutes = editAddViewModel.selectedTime
+            if (task.deadline != null) {
+                val timeParts = hoursMinutes.split(":")
+                val hours = timeParts[0].toIntOrNull() ?: 0
+                val minutes = timeParts[1].toIntOrNull() ?: 0
+                val formattedHours = hours.toString().trimStart('0')
+                val formattedMinutes = minutes.toString().trimStart('0')
+                val notificationTime = Calendar.getInstance()
+                val deadline = task.deadline
+                notificationTime.timeInMillis = deadline!!
+                val year = notificationTime.get(Calendar.YEAR)
+                val month = notificationTime.get(Calendar.MONTH)
+                val day = notificationTime.get(Calendar.DAY_OF_MONTH)
+                notificationTime.set(Calendar.YEAR, year)
+                notificationTime.set(Calendar.MONTH, month)
+                notificationTime.set(Calendar.DAY_OF_MONTH, day)
+                notificationTime.set(Calendar.HOUR_OF_DAY, if (formattedHours.isEmpty()) 0 else formattedHours.toInt())
+                notificationTime.set(Calendar.MINUTE, if (formattedMinutes.isEmpty()) 0 else formattedMinutes.toInt())
+                notificationTime.set(Calendar.SECOND, 0)
+                scheduleNotification(requireContext(), notificationTime, task)
+            }
         }
     }
 
@@ -125,15 +123,17 @@ class EditAddFragment : Fragment() {
         // обработка нажатия на "Сохранить"
         binding.saveButton.setOnClickListener {
             animation(binding.saveButton)
-            if (editAddViewModel.saveOrCreateFlag == 1) { // сохранить старую заметку
-                fillModel()
-                showSaveWarningDialog()
-            } else if (editAddViewModel.saveOrCreateFlag == 2) { // создать новую заметку
-                fillModel()
-                showNewSaveWarningDialog()
-
-            } else
-                Toast.makeText(context,"dgnjkdllxd", Toast.LENGTH_SHORT).show()
+            when (editAddViewModel.saveOrCreateFlag) {
+                1 -> { // сохранить старую заметку
+                    fillModel()
+                    showSaveWarningDialog()
+                }
+                2 -> { // создать новую заметку
+                    fillModel()
+                    showNewSaveWarningDialog()
+                }
+                else -> Toast.makeText(context,"dgnjkdllxd", Toast.LENGTH_SHORT).show()
+            }
         }
         // обработка нажатия на "Удалить"
         binding.removeButton.setOnClickListener {
@@ -143,6 +143,35 @@ class EditAddFragment : Fragment() {
             } else if (editAddViewModel.saveOrCreateFlag == 2) {
                 showCancelWarningDialog()
             }
+        }
+        binding.notificationButton.setOnClickListener {
+            showTimePickerDialog()
+        }
+        // заполнение данных по объекту из ViewModel
+        val text = editAddViewModel.toDoItem.text
+        binding.descriptionInput.setText(text)
+        val importance = editAddViewModel.toDoItem.priority
+        val deadline : Long? = editAddViewModel.toDoItem.deadline
+        when (importance) {
+            Importance.LOW -> _binding!!.toggleButtonImportance
+                .check(_binding!!.slowButton.id)
+            Importance.BASIC -> _binding!!.toggleButtonImportance
+                .check(_binding!!.normalButton.id)
+            Importance.IMPORTANT -> _binding!!.toggleButtonImportance
+                .check(_binding!!.urgentlyButton.id)
+        }
+        if (deadline != null) {
+            binding.showCalendar.isChecked = true
+            binding.myDeadlineDatePicker.visibility = View.VISIBLE
+            val calendar = Calendar.getInstance()
+            calendar.time = Date()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+            binding.myDeadlineDatePicker.updateDate(year, month, day)
+        } else {
+            binding.showCalendar.isChecked = false
+            binding.myDeadlineDatePicker.visibility = View.GONE
         }
         super.onResume()
     }
@@ -294,6 +323,15 @@ class EditAddFragment : Fragment() {
             .show()
     }
 
+    private fun areDatesEqual(date1: Long, date2: Long): Boolean {
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+
+        val formattedDate1 = dateFormat.format(Date(date1))
+        val formattedDate2 = dateFormat.format(Date(date2))
+
+        return formattedDate1 == formattedDate2
+    }
+
     private fun fillModel() {
         val creationDate : Long = Calendar.getInstance().time.time
         var deadline: Long? = null
@@ -313,6 +351,21 @@ class EditAddFragment : Fragment() {
             R.id.normalButton -> Importance.BASIC
             R.id.urgentlyButton -> Importance.IMPORTANT
             else -> Importance.BASIC
+        }
+        if (deadline == null && editAddViewModel.toDoItem.deadline != null)
+            NotificationHelper.deleteNotification(requireContext(), editAddViewModel.toDoItem)
+
+        if (deadline != null && editAddViewModel.selectedTime == "99:99") {
+            if (editAddViewModel.toDoItem.deadline == null)
+                editAddViewModel.selectedTime = "00:00"
+            else {
+                when (areDatesEqual(deadline, editAddViewModel.toDoItem.deadline!!)) {
+                    true -> {}
+                    false -> {
+                        editAddViewModel.selectedTime = "00:00"
+                    }
+                }
+            }
         }
         val newToDoItem : TaskModel = if (editAddViewModel.saveOrCreateFlag == 2) {
             TaskModel(UUID.randomUUID(), text = taskText,
@@ -341,7 +394,7 @@ class EditAddFragment : Fragment() {
                                 .build()
                         Navigation.findNavController(binding.root).navigate(R.id.nav_home, Bundle(), navOptions)
                     }
-                    is UiState.Error -> Navigation.findNavController(binding.root).navigate(R.id.nav_home)
+                    is UiState.Error -> {view?.snackbar("Error!")}
                     }
                 }
             }
@@ -354,6 +407,8 @@ class EditAddFragment : Fragment() {
                 when (uiState) {
                     is UiState.Start -> {}
                     is UiState.Success -> {
+                        NotificationHelper.deleteNotification(requireContext(),
+                            editAddViewModel.toDoItem)
                         val builder = NavOptions.Builder()
                         val navOptions: NavOptions =
                             builder.setEnterAnim(R.anim.slide_out_left).setExitAnim(R.anim.slide_in_right)

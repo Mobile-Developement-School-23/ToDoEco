@@ -1,5 +1,6 @@
 package com.example.todoapp.ui.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.todoapp.domain.DataState
 import com.example.todoapp.domain.Importance
@@ -28,7 +29,7 @@ class EditAddViewModel(
     private var _toDoItem : TaskModel = TaskModel(UUID.randomUUID(),
         "", Importance.BASIC, false, Date().time, null, Date().time)
     val toDoItem : TaskModel get() = _toDoItem
-    var selectedTime: String = ""
+    var selectedTime: String = "99:99"
 
     fun addTask(): Flow<UiState<String>> = flow {
         emit(UiState.Start)
@@ -71,7 +72,6 @@ class EditAddViewModel(
         this._saveOrCreateFlag = flag
     }
 
-
     suspend fun setItemById(id: String) {
         if (id != "-1") {
             requireTask(UUID.fromString(id)).collect { dataState ->
@@ -79,10 +79,8 @@ class EditAddViewModel(
                     is UiState.Success -> {
                         _toDoItem = dataState.data
                     }
-
                     is UiState.Error -> {
                     }
-
                     else -> {
                     }
                 }
@@ -91,9 +89,6 @@ class EditAddViewModel(
     }
 
     fun setItemByObject(item: TaskModel) {
-
         this._toDoItem = item
-
     }
-
 }

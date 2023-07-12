@@ -1,7 +1,5 @@
 package com.example.todoapp.ui.fragments
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -15,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
-import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -24,14 +21,12 @@ import androidx.lifecycle.coroutineScope
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
-import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.todoapp.R
-import com.example.todoapp.ToDoApplication
 import com.example.todoapp.data.network.observers.ConnectivityObserver
 import com.example.todoapp.databinding.FragmentHomeBinding
 import com.example.todoapp.domain.TaskModel
@@ -42,6 +37,7 @@ import com.example.todoapp.ui.recycler.adapters.ToDoAdapter
 import com.example.todoapp.ui.viewmodels.HomeViewModel
 import com.example.todoapp.ui.viewmodels.ViewModelFactory
 import com.example.todoapp.ui.recycler.SwipeGesture
+import com.example.todoapp.ui.util.NotificationHelper
 import com.example.todoapp.ui.util.snackbar
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -50,7 +46,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 
 class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
@@ -68,8 +63,6 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var navController: NavController
     private var internetState = ConnectivityObserver.Status.Unavailable
-//    private lateinit var snackbar: Snackbar
-//    private lateinit var countdownTimer: CountDownTimer
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -107,26 +100,24 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                             when (it) {
                                 is UiState.Start -> view?.snackbar("Loading...")
                                 is UiState.Success -> view?.snackbar("UP-TO-DATE!")
-                                is UiState.Error -> view?.snackbar("Refreshing error, try again!")
+                                is UiState.Error -> view?.snackbar("Refreshing error, " +
+                                        "try again!")
                             }
                         }
                     }
                 }
 
             }
-
             ConnectivityObserver.Status.Unavailable -> {
                 if (internetState != status) {
                     view?.snackbar("Not internet connection!")
                 }
             }
-
             ConnectivityObserver.Status.Losing -> {
                 if (internetState != status) {
                     view?.snackbar("Loss of Internet connection...")
                 }
             }
-
             ConnectivityObserver.Status.Lost -> {
                 if (internetState != status) {
                     view?.snackbar("The Internet connection is lost.")
@@ -182,7 +173,10 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                     model.removeTask(todoItem).collect { uiState ->
                         when (uiState) {
                             is UiState.Error -> view?.snackbar(uiState.cause)
-                            else -> {}
+                            else -> {
+                                NotificationHelper.deleteNotification(requireContext(),
+                                   todoItem)
+                            }
                         }
                     }
                 }
@@ -274,7 +268,10 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
                                 model.removeTask(removedElement).collect { uiState ->
                                     when (uiState) {
                                         is UiState.Error -> view?.snackbar(uiState.cause)
-                                        else -> {}
+                                        else -> {
+                                            NotificationHelper.deleteNotification(requireContext(),
+                                                removedElement)
+                                        }
                                     }
                                 }
                             }
@@ -401,9 +398,4 @@ class HomeFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             fadeOutAnimator.start()
         }, totalDuration - disappearanceDuration)
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
 }

@@ -8,7 +8,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:name=".ToDoApplication"
         android:allowBackup="true"
@@ -43,8 +42,10 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".ui.receivers.NotificationReceiver" />
-
+        <receiver
+            android:name=".ui.receivers.NotificationReceiver"
+            android:enabled="true"
+            android:exported="false" />
 
         <meta-data
             android:name="preloaded_fonts"

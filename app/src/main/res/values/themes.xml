@@ -12,6 +12,11 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="background">@color/light_rampart</item>
+        <item name="floatingActionButtonLargePrimaryStyle">@color/sneaky_Sesame</item>
+        <item name="toolbarId">@color/sneaky_Sesame</item>
+        <item name="backgroundColor">@color/light_cave_Man</item>
+        <item name="editTextBackground">@color/white</item>
     </style>
 
     <style name="Theme.ToDoApp.NoActionBar">
@@ -40,14 +45,9 @@
 
 
     <style name="CustomDatePickerStyle" parent="@android:style/Widget.Material.Light.DatePicker">
-
         <item name="android:background">@color/light_cave_Man</item>
-
         <item name="android:textColorPrimary">@color/black_Olive</item>
-
         <item name="android:headerBackground">@color/green_Empress</item>
-
-
     </style>
 
     <style name="RoundCorner" parent="">
@@ -59,6 +59,10 @@
 
     <style name="CustomAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:windowBackground">@drawable/popup_background</item>
+    </style>
+
+    <style name="InfoFragment" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="backgroundColor">@color/light_cave_Man</item>
     </style>
 
 </resources>

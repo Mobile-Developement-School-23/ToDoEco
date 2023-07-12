@@ -13,11 +13,8 @@ abstract class SwipeGesture(context: Context): ItemTouchHelper.SimpleCallback(0,
 ) {
     private val deleteColor= ContextCompat.getColor(context, R.color.red)
     private val deleteIcon= R.drawable.deletemove
-
     private val infoColor=ContextCompat.getColor(context,R.color.gray_info)
     private val infoIcon=R.drawable.infomove
-
-
     override fun onChildDraw(
         c: Canvas,
         recyclerView: RecyclerView,
@@ -27,7 +24,6 @@ abstract class SwipeGesture(context: Context): ItemTouchHelper.SimpleCallback(0,
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
-
         RecyclerViewSwipeDecorator.Builder(
             c,
             recyclerView,
@@ -43,8 +39,6 @@ abstract class SwipeGesture(context: Context): ItemTouchHelper.SimpleCallback(0,
             .addSwipeRightActionIcon(infoIcon)
             .create()
             .decorate()
-
-
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
     }
 
