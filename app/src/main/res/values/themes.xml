@@ -17,6 +17,7 @@
         <item name="toolbarId">@color/sneaky_Sesame</item>
         <item name="backgroundColor">@color/light_cave_Man</item>
         <item name="editTextBackground">@color/white</item>
+        <item name="color">@color/light_black_Olive</item>
     </style>
 
     <style name="Theme.ToDoApp.NoActionBar">
@@ -27,43 +28,6 @@
     <style name="Theme.ToDoApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.ToDoApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="ToggleButtonWithIconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="iconPadding">0dp</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:paddingLeft">12dp</item>
-        <item name="android:paddingRight">12dp</item>
-        <item name="android:minWidth">48dp</item>
-        <item name="android:minHeight">48dp</item>
-    </style>
-
-    <style name="CustomSwitchStyle" parent="Widget.AppCompat.CompoundButton.Switch">
-        <item name="android:thumbTint">@color/black_Olive</item>
-        <item name="android:trackTint">@color/green_Empress</item>
-    </style>
-
-
-    <style name="CustomDatePickerStyle" parent="@android:style/Widget.Material.Light.DatePicker">
-        <item name="android:background">@color/light_cave_Man</item>
-        <item name="android:textColorPrimary">@color/black_Olive</item>
-        <item name="android:headerBackground">@color/green_Empress</item>
-    </style>
-
-    <style name="RoundCorner" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">20dp</item>
-        <item name="color">@color/white</item>
-
-    </style>
-
-    <style name="CustomAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:windowBackground">@drawable/popup_background</item>
-    </style>
-
-    <style name="InfoFragment" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="backgroundColor">@color/light_cave_Man</item>
-    </style>
 
 </resources>
 

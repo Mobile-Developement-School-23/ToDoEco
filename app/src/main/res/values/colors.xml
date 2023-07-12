@@ -27,5 +27,7 @@
     <color name="light_night_background">#857E78</color>
     <color name="brown_gray">#B8B3B3</color>
     <color name="night_white">#857D7D</color>
-    <color name="light_Olive">#605F5B</color>
+    <color name="light_Olive">#989792</color>
+    <color name="very_light_Olive">#C0BFB8</color>
+    <color name="light_black_Olive">#53524C</color>
 </resources>

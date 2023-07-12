@@ -19,10 +19,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:fontFamily="@font/ubuntu_bold"
+            style="@style/Header"
             android:text="@string/new_task"
-            android:textColor="@color/black_Olive"
-            android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -52,10 +50,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:fontFamily="@font/ubuntu"
+            style="@style/Small_interface_text"
             android:text="@string/set_deadline"
-            android:textColor="@color/black_Olive"
-            android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toggleButtonImportance" />
 
@@ -93,10 +89,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:fontFamily="@font/ubuntu"
+            style="@style/Interface_text"
             android:text="@string/importance"
-            android:textColor="@color/black_Olive"
-            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/descriptionInput" />
 
@@ -152,7 +146,7 @@
             android:backgroundTint="?attr/floatingActionButtonLargePrimaryStyle"
             android:fontFamily="@font/ubuntu"
             android:text="@string/cancel"
-            android:textColor="@color/black_Olive"
+            android:textColor="?attr/colorSecondary"
             app:cornerRadius="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/newTask" />
@@ -166,7 +160,7 @@
             android:backgroundTint="?attr/floatingActionButtonLargePrimaryStyle"
             android:fontFamily="@font/ubuntu"
             android:text="@string/save"
-            android:textColor="@color/black_Olive"
+            android:textColor="?attr/colorSecondary"
             app:cornerRadius="20dp"
             app:iconGravity="start"
             app:layout_constraintEnd_toEndOf="parent"
@@ -181,7 +175,7 @@
             android:backgroundTint="?attr/floatingActionButtonLargePrimaryStyle"
             android:fontFamily="@font/ubuntu"
             android:text="@string/remove"
-            android:textColor="@color/black_Olive"
+            android:textColor="?attr/colorSecondary"
             app:cornerRadius="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

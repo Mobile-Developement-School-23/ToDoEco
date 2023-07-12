@@ -7,7 +7,7 @@
         <item name="colorPrimaryVariant">@color/heavy_Metal</item>
         <item name="colorOnPrimary">@color/lightBlack</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/black_Olive</item>
+        <item name="colorSecondary">@color/light_Olive</item>
         <item name="colorSecondaryVariant">@color/black_Olive</item>
         <item name="colorOnSecondary">@color/brown_gray</item>
         <!-- Status bar color. -->
@@ -17,6 +17,7 @@
         <item name="toolbarId">@color/night2_sneaky_Sesame</item>
         <item name="backgroundColor">@color/cave_Man</item>
         <item name="editTextBackground">@color/night_white</item>
+        <item name="color">@color/very_light_Olive</item>
     </style>
 
     <style name="CustomDatePickerStyle" parent="@android:style/Widget.Material.Light.DatePicker">
