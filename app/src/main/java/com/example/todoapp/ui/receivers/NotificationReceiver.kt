@@ -17,16 +17,4 @@ class NotificationReceiver : BroadcastReceiver() {
         val timeInMillis = intent.getLongExtra("timeNotification", 0)
         NotificationHelper.showNotification(context, notificationId.toInt(), title, priority, taskId)
     }
-    @Deprecated("")
-    private fun generateRandomId(length: Int): String {
-        val random = Random()
-        val digits = "0123456789"
-        val sb = StringBuilder(length)
-        repeat(length) {
-            val randomIndex = random.nextInt(digits.length)
-            val randomDigit = digits[randomIndex]
-            sb.append(randomDigit)
-        }
-        return sb.toString()
-    }
 }

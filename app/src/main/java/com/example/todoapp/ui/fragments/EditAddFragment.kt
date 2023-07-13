@@ -12,7 +12,6 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,11 +72,10 @@ class EditAddFragment : Fragment() {
         alarmManager.set(AlarmManager.RTC_WAKEUP, notificationTime.timeInMillis, pendingIntent)
     }
 
-    private fun createNotification(task: TaskModel) {
-        if (editAddViewModel.selectedTime != "99:99") {
-            val hoursMinutes = editAddViewModel.selectedTime
+    private fun createNotification(selectedTime: String, task: TaskModel) {
+        if (selectedTime != "99:99") {
             if (task.deadline != null) {
-                val timeParts = hoursMinutes.split(":")
+                val timeParts = selectedTime.split(":")
                 val hours = timeParts[0].toIntOrNull() ?: 0
                 val minutes = timeParts[1].toIntOrNull() ?: 0
                 val formattedHours = hours.toString().trimStart('0')
@@ -91,8 +89,14 @@ class EditAddFragment : Fragment() {
                 notificationTime.set(Calendar.YEAR, year)
                 notificationTime.set(Calendar.MONTH, month)
                 notificationTime.set(Calendar.DAY_OF_MONTH, day)
-                notificationTime.set(Calendar.HOUR_OF_DAY, if (formattedHours.isEmpty()) 0 else formattedHours.toInt())
-                notificationTime.set(Calendar.MINUTE, if (formattedMinutes.isEmpty()) 0 else formattedMinutes.toInt())
+                notificationTime.set(
+                    Calendar.HOUR_OF_DAY,
+                    if (formattedHours.isEmpty()) 0 else formattedHours.toInt()
+                )
+                notificationTime.set(
+                    Calendar.MINUTE,
+                    if (formattedMinutes.isEmpty()) 0 else formattedMinutes.toInt()
+                )
                 notificationTime.set(Calendar.SECOND, 0)
                 scheduleNotification(requireContext(), notificationTime, task)
             }
@@ -387,7 +391,7 @@ class EditAddFragment : Fragment() {
                 when (uiState) {
                     is UiState.Start -> {}
                     is UiState.Success -> {
-                        createNotification(editAddViewModel.toDoItem)
+                        createNotification(editAddViewModel.selectedTime, editAddViewModel.toDoItem)
                         val builder = NavOptions.Builder()
                         val navOptions: NavOptions =
                             builder.setEnterAnim(R.anim.slide_out_left).setExitAnim(R.anim.slide_in_right)
@@ -426,7 +430,7 @@ class EditAddFragment : Fragment() {
             editAddViewModel.addTask().collect { uiState ->
                 when (uiState) {
                     is UiState.Success -> {
-                        createNotification(editAddViewModel.toDoItem)
+                        createNotification(editAddViewModel.selectedTime, editAddViewModel.toDoItem)
                         val builder = NavOptions.Builder()
                         val navOptions: NavOptions =
                             builder.setEnterAnim(R.anim.slide_out_left).setExitAnim(R.anim.slide_in_right)

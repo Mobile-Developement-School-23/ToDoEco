@@ -17,6 +17,7 @@ import com.example.todoapp.R
 import com.example.todoapp.domain.Importance
 import com.example.todoapp.domain.TaskModel
 import com.example.todoapp.ui.activity.MainActivity
+import com.example.todoapp.ui.receivers.NotificationButtonReceiver
 import com.example.todoapp.ui.receivers.NotificationReceiver
 import java.util.Calendar
 
@@ -58,10 +59,15 @@ object NotificationHelper {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        val intent = Intent(context, MainActivity::class.java)
-        intent.putExtra("shiftDay", true)
-        intent.putExtra("taskIDForShift", taskId)
-        val pendingIntent2 = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val buttonIntent = Intent(context, NotificationButtonReceiver::class.java)
+        buttonIntent.action = "MOVE_TO_NEXT_DAY_ACTION"
+        buttonIntent.putExtra("notificationID", notificationId)
+        buttonIntent.putExtra("taskID", taskId)
+        buttonIntent.putExtra("title", title)
+        buttonIntent.putExtra("content", content)
+        val pendingIntent2 = PendingIntent.getBroadcast(context, taskId.hashCode(),
+            buttonIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+
 
         val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.plant_svgrepo_com)

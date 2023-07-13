@@ -47,6 +47,8 @@
             android:enabled="true"
             android:exported="false" />
 
+        <receiver android:name=".ui.receivers.NotificationButtonReceiver" />
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
