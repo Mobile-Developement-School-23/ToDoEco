@@ -16,6 +16,7 @@
     <color name="black_Olive">#3b3a36</color>
     <color name="cave_Man">#625b57</color>
     <color name="light_cave_Man">#C8B8AF</color>
+    <color name="dayDivider">#AEA199</color>
     <color name="light_rampart">#DCD4CC</color>
     <color name="gray">#D8D6D6</color>
     <color name="red">#802020</color>
@@ -30,4 +31,7 @@
     <color name="light_Olive">#989792</color>
     <color name="very_light_Olive">#C0BFB8</color>
     <color name="light_black_Olive">#53524C</color>
+    <color name="dark_godzilla">#3D4219</color>
+    <color name="dark_cave_Man">#4C4744</color>
+    <color name="dark_rampart">#7E7870</color>
 </resources>

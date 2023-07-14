@@ -45,4 +45,8 @@
     <string name="notifications">Notification time</string>
 
     <string name="permission">Give permission for notifications to receive messages about the approaching deadline of tasks!</string>
+
+    <string name="low_importance">Low importance</string>
+    <string name="normal_importance">Normal importance</string>
+    <string name="high_importance">High importance</string>
 </resources>
