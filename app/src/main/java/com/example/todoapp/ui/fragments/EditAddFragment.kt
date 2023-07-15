@@ -13,6 +13,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +45,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -78,8 +82,11 @@ import com.example.todoapp.ui.util.dateStringToTimestamp
 import com.example.todoapp.ui.util.snackbar
 import com.example.todoapp.ui.viewmodels.EditAddViewModel
 import com.example.todoapp.ui.viewmodels.ViewModelFactory
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -92,6 +99,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 class EditAddFragment : Fragment() {
 
@@ -377,14 +385,34 @@ class EditAddFragment : Fragment() {
         }
     }
 
+    @Preview
     @Composable
-    private fun ToolbarComponent(
+    private fun ToolbarComponentPreview() {
+        MainTheme() {
+            MaterialTheme {
+                ToolbarComponent(
+                    close = {},
+                    editAdd = {}
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun ToolbarComponent(
         close: () -> Unit,
         editAdd: () -> Unit
     ) {
+        val scrollState = rememberScrollState()
+        val toolbarElevation by animateDpAsState(
+            targetValue = if (scrollState.value > 0) 8.dp else 0.dp,
+            animationSpec = tween(durationMillis = 250)
+        )
+
         TopAppBar(
             backgroundColor = MaterialTheme.colors.primary,
-            elevation = 8.dp
+            elevation = 0.dp,
+            modifier = Modifier.shadow(elevation = toolbarElevation)
         ) {
             Box(Modifier.weight(1f)) {
                 IconButton(
@@ -417,6 +445,19 @@ class EditAddFragment : Fragment() {
                     fontFamily = FontFamily.Monospace
                 )
             }
+        }
+    }
+
+    @Preview
+    @Composable
+    private fun EditTextComponentPreview() {
+        MainTheme() {
+            val textState = remember { mutableStateOf("") }
+            val textFlow = MutableStateFlow("Hello world!")
+            EditTextComponent(
+                text = textFlow,
+                change = { newText -> textState.value = newText }
+            )
         }
     }
 
@@ -463,6 +504,16 @@ class EditAddFragment : Fragment() {
         }
     }
 
+    @Preview
+    @Composable
+    private fun ImportanceComponentPreview() {
+        MainTheme() {
+            val importanceState = remember { mutableStateOf(Importance.BASIC) }
+            val importanceFlow = MutableStateFlow(Importance.LOW)
+
+            ImportanceComponent(importance = importanceFlow)
+        }
+    }
 
     @Composable
     private fun ImportanceComponent(
@@ -507,6 +558,22 @@ class EditAddFragment : Fragment() {
         }
     }
 
+    @Preview
+    @Composable
+    private fun DeadlineComponentPreview() {
+        MainTheme() {
+            val deadlineState = remember { mutableStateOf<Long?>(null) }
+            val deadlineFlow = MutableStateFlow(Date().time)
+
+            DeadlineComponent(
+                deadlineFlow = deadlineFlow,
+                onSwitchActivation = {},
+                onSwitchDeactivation = {},
+                onDeadlineClickAction = {}
+            )
+        }
+    }
+
     @Composable
     private fun DeadlineComponent(
         deadlineFlow: StateFlow<Long?>,
@@ -547,6 +614,14 @@ class EditAddFragment : Fragment() {
                     modifier = Modifier.weight(1f)
                 )
             }
+        }
+    }
+
+    @Preview
+    @Composable
+    private fun DeleteComponentPreview() {
+        MainTheme() {
+            DeleteComponent(onClick = {})
         }
     }
 
@@ -594,6 +669,25 @@ class EditAddFragment : Fragment() {
                 color = MaterialTheme.colors.onPrimary
             )
         }
+    }
+
+    @Preview
+    @Composable
+    private fun ToggleGroupWithThreeButtonsComponentPreview() {
+        MainTheme() {
+            ToggleGroupWithThreeButtonsComponent(onPositionSelected = {})
+        }
+    }
+
+    @Preview
+    @Composable
+    private fun ToggleableButtonComponentPreview() {
+        ToggleableButtonComponent(
+            icon = ImageVector.vectorResource(id = R.drawable.slow),
+            index = 0,
+            selectedButtonIndex = 0,
+            onButtonSelected = {}
+        )
     }
 
     @Composable
