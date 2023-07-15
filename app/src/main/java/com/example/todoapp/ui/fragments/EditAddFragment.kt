@@ -15,8 +15,11 @@ import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +43,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
@@ -331,14 +335,15 @@ class EditAddFragment : Fragment() {
         deadlineAction: () -> Unit,
         deleteAction: () -> Unit,
     ) {
+        val scrollState = rememberScrollState()
+
         MainTheme {
             Scaffold(
                 backgroundColor = MaterialTheme.colors.background,
                 topBar = {
-                    ToolbarComponent(close, editadd)
+                    ToolbarComponent(close, editadd, scrollState)
                 }
             ) { padding ->
-                val scrollState = rememberScrollState()
                 Column(
                     modifier = Modifier
                         .padding(padding)
@@ -392,7 +397,8 @@ class EditAddFragment : Fragment() {
             MaterialTheme {
                 ToolbarComponent(
                     close = {},
-                    editAdd = {}
+                    editAdd = {},
+                ScrollState(0)
                 )
             }
         }
@@ -401,18 +407,12 @@ class EditAddFragment : Fragment() {
     @Composable
     fun ToolbarComponent(
         close: () -> Unit,
-        editAdd: () -> Unit
+        editAdd: () -> Unit,
+        scrollState: ScrollState
     ) {
-        val scrollState = rememberScrollState()
-        val toolbarElevation by animateDpAsState(
-            targetValue = if (scrollState.value > 0) 8.dp else 0.dp,
-            animationSpec = tween(durationMillis = 250)
-        )
-
         TopAppBar(
-            backgroundColor = MaterialTheme.colors.primary,
-            elevation = 0.dp,
-            modifier = Modifier.shadow(elevation = toolbarElevation)
+            backgroundColor = MaterialTheme.colors.surface,
+            elevation = if (scrollState.value > 0) 8.dp else 0.dp,
         ) {
             Box(Modifier.weight(1f)) {
                 IconButton(
